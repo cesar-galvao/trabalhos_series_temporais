@@ -177,12 +177,12 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[sharp corners, enhanced, breakable, frame hidden, interior hidden, boxrule=0pt, borderline west={3pt}{0pt}{shadecolor}]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[breakable, sharp corners, enhanced, frame hidden, boxrule=0pt, interior hidden, borderline west={3pt}{0pt}{shadecolor}]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
 \hypersetup{linkcolor=}
-\setcounter{tocdepth}{3}
+\setcounter{tocdepth}{2}
 \tableofcontents
 }
 \newpage{}
@@ -230,10 +230,6 @@ magnitude dos dados da série. A decomposição é exposta a seguir.
 \section{Modelos ARIMA: seleção, transformações e
 resíduos}\label{modelos-arima-seleuxe7uxe3o-transformauxe7uxf5es-e-resuxedduos}}
 
-COMENTAR - para que serve diff normal e sazonal - o que conseguimos
-depois de aplicar - teste de estacionariedade - deixar pronto para a
-modelagem
-
 \hypertarget{modelo-sem-transformauxe7uxe3o}{%
 \subsection{Modelo sem
 transformação}\label{modelo-sem-transformauxe7uxe3o}}
@@ -241,35 +237,88 @@ transformação}\label{modelo-sem-transformauxe7uxe3o}}
 \hypertarget{seleuxe7uxe3o}{%
 \subsubsection{Seleção}\label{seleuxe7uxe3o}}
 
-\begin{verbatim}
-[1] 1
-\end{verbatim}
+Primeiramente, utilizou-se as funções \emph{ndiffs()} e \emph{nsdiffs()}
+do pacote \emph{forecast} para identificar quantas diferenças simples e
+sazonais seriam necessárias para que a série se tornasse estacionária.
+Concluiu-se pelo resultado dessas funções que são necessárias uma
+diferenciação simples e uma sazonal. O teste KPSS confirma isso ao não
+rejeitar a hipótese nula de estacionariedade da série (com diferenças já
+aplicadas) ao nível de 5\% de significância.
 
-\begin{verbatim}
-[1] 1
-\end{verbatim}
+\begin{longtable*}{lcc}
+\toprule
+ & Estatística & p-valor\\
+\midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{\textit{(continued)}}\\
+\toprule
+ & Estatística & p-valor\\
+\midrule
+\endhead
+
+\endfoot
+\bottomrule
+\endlastfoot
+\cellcolor{gray!15}{KPSS Test for Level Stationarity} & \cellcolor{gray!15}{0.11} & \cellcolor{gray!15}{0.1}\\*
+\end{longtable*}
+
+Prosseguimos com a seleção do melhor modelo ARIMA avaliando os gráficos
+de ACF e PACF. O primeiro parece apresentar quebra no primeiro lag
+sazonal, enquanto o segundo tem quebra no segundo lag simples.
+Entretanto, como não fica nítido um comportamento de queda amortizada,
+preferiu-se utilizar outro critério para a seleção do modelo.
 
 \includegraphics{T2_grupo5_files/figure-pdf/acf-pacf-sem-transformacao-1.pdf}
 
-\begin{verbatim}
- non-finite finite-difference value [1] 
-\end{verbatim}
+Optou-se pela varredura de combinações de \(p\), \(q\), \(P\) e \(Q\),
+com \(d\) e \(D\) fixados em 1, como resultado das diferenciações ja
+avaliadas. Utilizando o critério de Akaike corrigido, seleciona-se o
+modelo \(\text{ARIMA}(2,1,2)\times(0,1,2)_{12}\) para a série, que
+possui o menor escore entre os modelos testados.
 
-\begin{verbatim}
-[1] 1380.949
-\end{verbatim}
-
-\begin{itemize}
-\tightlist
-\item
-  Construção do modelo
-\end{itemize}
-
-O modelo selecionado foi ARIMA(2,1,2)x(0,1,2) para a série original e
-com transformação de Box-Cox.
+Ao se utilizar a função \texttt{auto.arima()}, recebe-se um modelo
+sugerido \(\text{ARIMA}(2,1,2)\times(2,1,0)_{12}\), porém com AICc
+superior àquele identificado na varredura. Opta-se pelo modelo
+selecionado manualmente.
 
 \hypertarget{resuxedduos}{%
 \subsubsection{Resíduos}\label{resuxedduos}}
+
+Foram retirados os zeros da inicialização para possibilitar a análise
+dos resíduos. Observa-se pelo gráfico que os resíduos são aleatórios e
+aparentemente centrados em zero, com variação constante. Além disso,
+verifica-se uma distribuição aproximadamente normal, mas com caudas mais
+pesadas. Finalmente, o gráfico ACF apresenta que a autocorrelação dos
+resíduos está, em sua grande maioria, dentro da banda de confiança, com
+exceção de um ponto, que extrapola ligeiramente a margem.
+
+\includegraphics{T2_grupo5_files/figure-pdf/residuos-arima-1.pdf}
+
+Por fim, realiza-se testes de hipótese para independência e normalidade
+(o teste KPSS para estacionariedade já foi apresentado) e seus
+resultados são apresentados na tabela a seguir. De fato, o teste de
+Shapiro-Wilk não rejeita a normalidade da distribuição dos resíduos
+apesar de o gráfico QQ apresentar caudas pesadas. Além disso, o teste
+Ljung-Box com \emph{lag} igual a 15 também não rejeita a independência
+entre os resíduos e, consequentemente, os dados da série.
+
+\begin{longtable*}{lccc}
+\toprule
+ & Estatística & p-valor & Lag\\
+\midrule
+\endfirsthead
+\multicolumn{4}{@{}l}{\textit{(continued)}}\\
+\toprule
+ & Estatística & p-valor & Lag\\
+\midrule
+\endhead
+
+\endfoot
+\bottomrule
+\endlastfoot
+\cellcolor{gray!15}{Box-Ljung test} & \cellcolor{gray!15}{8.90} & \cellcolor{gray!15}{0.88} & \cellcolor{gray!15}{15}\\
+Shapiro-Wilk normality test & 0.99 & 0.35 & \\*
+\end{longtable*}
 
 \hypertarget{modelo-com-transformauxe7uxe3o}{%
 \subsection{Modelo com
@@ -278,8 +327,93 @@ transformação}\label{modelo-com-transformauxe7uxe3o}}
 \hypertarget{seleuxe7uxe3o-1}{%
 \subsubsection{Seleção}\label{seleuxe7uxe3o-1}}
 
+Foi utilizada a função \emph{BoxCox.lambda()} do pacote \emph{forecast}
+para decidir de forma automatizada o melhor valor de lambda para a
+transformação de Box-Cox. A função sugere um valor de \(\lambda =\)
+0.71.
+
+Apesar de haver uma sugestão de transformação, não é possível avaliar
+graficamente se houve uma diferença significativa no comportamento da
+série temporal excetuando-se a escala, como se pode ver nos eixos dos
+gráficos a seguir.
+
+\includegraphics{T2_grupo5_files/figure-pdf/comparacao-transformacao-arima-1.pdf}
+
+Após aplicar a tranformação de Box-Cox na série, utilizou-se as funções
+\emph{ndiffs()} e \emph{nsdiffs()} para identificar quantas
+diferenciações simples e sazonais seriam necessárias para que a série se
+torne estacionária. Concluiu-se que são necessárias uma diferenciações
+simples e uma diferenciações sazonal, o que é confirmado pelo resultado
+do teste KPSS nos resíduos da série com as diferenças já aplicadas.
+
+\begin{longtable*}{lcc}
+\toprule
+ & Estatística & p-valor\\
+\midrule
+\endfirsthead
+\multicolumn{3}{@{}l}{\textit{(continued)}}\\
+\toprule
+ & Estatística & p-valor\\
+\midrule
+\endhead
+
+\endfoot
+\bottomrule
+\endlastfoot
+\cellcolor{gray!15}{KPSS Test for Level Stationarity} & \cellcolor{gray!15}{0.12} & \cellcolor{gray!15}{0.1}\\*
+\end{longtable*}
+
+O gráfico da ACF parece apresentar quebra no primeiro lag sazonal,
+enquanto o PACF tem quebra no segundo lag simples. Entretanto, os
+gráficos não evidenciam comportamentos claros para a série. Novamente,
+os resíduos parecem ter média igual a zero.
+
+\includegraphics{T2_grupo5_files/figure-pdf/acf-pacf-arima-boxcox-1.pdf}
+
+Foram testadas combinações de \(p\), \(q\), \(P\) e \(Q\), com \(d\) e
+\(D\) fixados em 1 e, em seguida, selecionou-se o modelo ARIMA que
+apresentava menor valor do AICc. Temos, então, que o modelo escolhido
+para a série transformada é um
+\(\text{ARIMA}(2,1,2)\times(0,1,2)_{12}\), assim como no caso da série
+sem transformação. Utilizando-se a função \texttt{auto.arima()}
+recebe-se uma sugestão de um modelo \(ARIMA(3,1,1)\times(2,1,0)_{12}\)
+mas, assim como ocorre no modelo sem transformação, opta-se pelo modelo
+selecionado manualmente por apresentar um AICc menor.
+
 \hypertarget{resuxedduos-1}{%
 \subsubsection{Resíduos}\label{resuxedduos-1}}
+
+Foram retirados os zeros da inicialização para seguir com a análise dos
+resíduos. O gráfico da série dos resíduos sugere aleatoriedade e o QQ
+plot distribuição aproximadamente normal. Por último, o gráfico ACF
+mostra que a autocorrelação dos resíduos está dentro da banda de
+confiança, com exceção de um ponto que excede um pouco este limite.
+
+\includegraphics{T2_grupo5_files/figure-pdf/residuos-arima-boxcox-1.pdf}
+
+Assim como ocorre para a série não transformada, os testes de
+Shapiro-Wilk e Ljung-box com \emph{lag} igual a 15 não apresentam
+indicação para rejeição de suas hipóteses nulas. Isto é, pode-se dizer
+que a série transformada tem distribuição normal e seus resíduos são
+independentes.
+
+\begin{longtable*}{lccc}
+\toprule
+ & Estatística & p-valor & Lag\\
+\midrule
+\endfirsthead
+\multicolumn{4}{@{}l}{\textit{(continued)}}\\
+\toprule
+ & Estatística & p-valor & Lag\\
+\midrule
+\endhead
+
+\endfoot
+\bottomrule
+\endlastfoot
+\cellcolor{gray!15}{Box-Ljung test} & \cellcolor{gray!15}{8.41} & \cellcolor{gray!15}{0.91} & \cellcolor{gray!15}{15}\\
+Shapiro-Wilk normality test & 0.98 & 0.23 & \\*
+\end{longtable*}
 
 \hypertarget{modelos-ets-seleuxe7uxe3o-transformauxe7uxf5es-e-resuxedduos}{%
 \section{Modelos ETS: seleção, transformações e
@@ -291,6 +425,8 @@ transformação}\label{modelo-sem-transformauxe7uxe3o-1}}
 
 \hypertarget{seleuxe7uxe3o-2}{%
 \subsubsection{Seleção}\label{seleuxe7uxe3o-2}}
+
+Iniciamos a exploração do modelo
 
 \begin{longtable*}{lccc}
 \toprule
@@ -308,14 +444,10 @@ Modelo & AIC & AICc & BIC\\
 \endlastfoot
 \cellcolor{gray!15}{ETS(M,Ad,M)} & \cellcolor{gray!15}{1761.30} & \cellcolor{gray!15}{1768.36} & \cellcolor{gray!15}{1810.87}\\
 ETS(M,M,M) & 1761.94 & 1769.00 & 1811.51\\
-\cellcolor{gray!15}{ETS(Ad,A,A)} & \cellcolor{gray!15}{1764.25} & \cellcolor{gray!15}{1771.30} & \cellcolor{gray!15}{1813.81}\\
+\cellcolor{gray!15}{ETS(A,Ad,A)} & \cellcolor{gray!15}{1764.25} & \cellcolor{gray!15}{1771.30} & \cellcolor{gray!15}{1813.81}\\
 ETS(M,Ad,A) & 1767.73 & 1774.78 & 1817.29\\
 \cellcolor{gray!15}{ETS(M,A,M)} & \cellcolor{gray!15}{1769.04} & \cellcolor{gray!15}{1775.29} & \cellcolor{gray!15}{1815.86}\\
-ETS(A,A,A) & 1771.20 & 1777.44 & 1818.01\\
-\cellcolor{gray!15}{ETS(M,A,A)} & \cellcolor{gray!15}{1774.56} & \cellcolor{gray!15}{1780.81} & \cellcolor{gray!15}{1821.38}\\
-ETS(M,M,M) & 1781.06 & 1787.30 & 1827.87\\
-\cellcolor{gray!15}{ETS(A,N,A)} & \cellcolor{gray!15}{1812.26} & \cellcolor{gray!15}{1817.06} & \cellcolor{gray!15}{1853.56}\\
-ETS(M,N,M) & 1827.18 & 1831.98 & 1868.48\\*
+ETS(A,A,A) & 1771.20 & 1777.44 & 1818.01\\*
 \end{longtable*}
 
 \includegraphics{T2_grupo5_files/figure-pdf/melhor-fit-ETL-sem-transf-1.pdf}
@@ -359,11 +491,7 @@ ETS(M,M,M) & 1761.94 & 1769.00 & 1811.51\\
 \cellcolor{gray!15}{ETS(Ad,A,A)} & \cellcolor{gray!15}{1764.25} & \cellcolor{gray!15}{1771.30} & \cellcolor{gray!15}{1813.81}\\
 ETS(M,Ad,A) & 1767.73 & 1774.78 & 1817.29\\
 \cellcolor{gray!15}{ETS(M,A,M)} & \cellcolor{gray!15}{1769.04} & \cellcolor{gray!15}{1775.29} & \cellcolor{gray!15}{1815.86}\\
-ETS(A,A,A) & 1771.20 & 1777.44 & 1818.01\\
-\cellcolor{gray!15}{ETS(M,A,A)} & \cellcolor{gray!15}{1774.56} & \cellcolor{gray!15}{1780.81} & \cellcolor{gray!15}{1821.38}\\
-ETS(M,M,M) & 1781.06 & 1787.30 & 1827.87\\
-\cellcolor{gray!15}{ETS(A,N,A)} & \cellcolor{gray!15}{1812.26} & \cellcolor{gray!15}{1817.06} & \cellcolor{gray!15}{1853.56}\\
-ETS(M,N,M) & 1827.18 & 1831.98 & 1868.48\\*
+ETS(A,A,A) & 1771.20 & 1777.44 & 1818.01\\*
 \end{longtable*}
 
 OS MODELOS SAO OS MESMO, PODEMO SELECIONAR O SEGUNDO MELHOR
@@ -401,7 +529,7 @@ objetivo;
 \section{Apêndice}\label{apuxeandice}}
 
 Todo o projeto de composição deste documento pode ser encontrado aqui:
-https://github.com/cesar-galvao/trabalhos\_series
+\url{https://github.com/cesar-galvao/trabalhos_series_temporais}
 
 
 

@@ -8,6 +8,7 @@ author:
 format: 
   pdf:
     toc: true
+    toc-depth: 2
     keep-tex: true
     include-in-header:
       text: |
@@ -86,22 +87,45 @@ decomp_mstl %>% autoplot(main = "Decomposição MSTL com período anual simples"
 
 # Modelos ARIMA: seleção, transformações e resíduos
 
-COMENTAR
-- para que serve diff normal e sazonal
-- o que conseguimos depois de aplicar
-- teste de estacionariedade
-- deixar pronto para a modelagem
-
 ## Modelo sem transformação
 
 ### Seleção
 
+Primeiramente, utilizou-se as funções *ndiffs()* e *nsdiffs()* do pacote *forecast* para identificar quantas diferenças simples e sazonais seriam necessárias para que a série se tornasse estacionária. Concluiu-se pelo resultado dessas funções que são necessárias uma diferenciação simples e uma sazonal. O teste KPSS confirma isso ao não rejeitar a hipótese nula de estacionariedade da série (com diferenças já aplicadas) ao nível de 5% de significância.
+
 ```{r diff-arima}
-ndiffs(serie_ms)
-serie_ms %>% diff() %>% nsdiffs()
+# diferenciacoes comuns
+# ndiffs(serie_ms)
+
+#diferenciacoes sazonais
+# serie_ms %>% diff() %>% nsdiffs()
 
 serie_ms_diff <- serie_ms %>% diff() %>% diff(lag = 12)
+
+# Inicializacao dos resíduos
+fit <- Arima(dados, order=c(2,1,2), seasonal=c(0,1,2)) #modelo selecionado em outro estágio da análise
+E <- window(fit$residuals, start=c(1984,1))
+
+kpss.test(E) %>% 
+  tidy()%>%
+  select(method, statistic, `p.value`) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2,
+    col.names = c("", "Estatística", "p-valor")
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
 ```
+
+Prosseguimos com a seleção do melhor modelo ARIMA avaliando os gráficos de ACF e PACF. O primeiro parece apresentar quebra no primeiro lag sazonal, enquanto o segundo tem quebra no segundo lag simples. Entretanto, como não fica nítido um comportamento de queda amortizada, preferiu-se utilizar outro critério para a seleção do modelo.
 
 ```{r acf-pacf-sem-transformacao, fig.height=3, fig.width = 8}
 # Graficos de Autocorrelacao
@@ -111,7 +135,11 @@ acf(serie_ms_diff, lag=12*6, main="ACF")
 pacf(serie_ms_diff, lag=12*6, main="PACF")
 ```
 
-```{r aicc-sem-transformacao}
+Optou-se pela varredura de combinações de $p$, $q$, $P$ e $Q$, com $d$ e $D$ fixados em 1, como resultado das diferenciações ja avaliadas. Utilizando o critério de Akaike corrigido, seleciona-se o modelo $\text{ARIMA}(2,1,2)\times(0,1,2)_{12}$ para a série, que possui o menor escore entre os modelos testados.
+
+Ao se utilizar a função `auto.arima()`, recebe-se um modelo sugerido $\text{ARIMA}(2,1,2)\times(2,1,0)_{12}$, porém com AICc superior àquele identificado na varredura. Opta-se pelo modelo selecionado manualmente.
+
+```{r aicc-sem-transformacao, include = FALSE}
 melhor_AICc <- Inf
 for(p in 0:2){
   for(q in 0:2){
@@ -132,36 +160,185 @@ for(p in 0:2){
   }
 }
 
-melhor_AICc
+#melhor_AICc
+
+# teste com auto.arima para verificar
+#auto.arima(serie_ms)
 ```
-
--   Construção do modelo
-
-O modelo selecionado foi ARIMA(2,1,2)x(0,1,2) para a série original e com transformação de Box-Cox.
 
 
 ### Resíduos
 
+Foram retirados os zeros da inicialização para possibilitar a análise dos resíduos. Observa-se pelo gráfico que os resíduos são aleatórios e aparentemente centrados em zero, com variação constante. Além disso, verifica-se uma distribuição aproximadamente normal, mas com caudas mais pesadas. Finalmente, o gráfico ACF apresenta que a autocorrelação dos resíduos está, em sua grande maioria, dentro da banda de confiança, com exceção de um ponto, que extrapola ligeiramente a margem.
+
+```{r residuos-arima, fig.height=3, fig.width = 8}
+
+# Analise de residuos
+par(mfrow=c(1,3))
+plot(E, main="Resíduos",ylab="")
+qqnorm(E)
+qqline(E)
+acf(E,lag.max=12*6,main="ACF")
+```
+
+Por fim, realiza-se testes de hipótese para independência e normalidade (o teste KPSS para estacionariedade já foi apresentado) e seus resultados são apresentados na tabela a seguir. De fato, o teste de Shapiro-Wilk não rejeita a normalidade da distribuição dos resíduos apesar de o gráfico QQ apresentar caudas pesadas. Além disso, o teste Ljung-Box com *lag* igual a 15 também não rejeita a independência entre os resíduos e, consequentemente, os dados da série.
+
+
+```{r testes-arima}
+#Testes
+box <- Box.test(E,lag=15,type="Ljung-Box") %>% tidy() %>% select(method, everything()) %>% mutate(parameter = as.character(parameter)) #independencia
+shap <- shapiro.test(E) %>% tidy() %>% mutate(parameter = "") %>% select(method, everything())  #normalidade
+
+bind_rows(box, shap) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2,
+    col.names = c("", "Estatística", "p-valor", "Lag")
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+
+rm(box, shap)
+```
 
 ## Modelo com transformação
 
 ### Seleção
 
-```{r transformacao}
+
+```{r transformacao-boxcox}
+# Transformacao de Box-Cox
+autolambda <- BoxCox.lambda(dados)
+dadosbc <- BoxCox(dados, lambda=autolambda)
 
 ```
 
-```{r acf-pacf-transformado}
+Foi utilizada a função *BoxCox.lambda()* do pacote *forecast* para decidir de forma automatizada o melhor valor de lambda para a transformação de Box-Cox. A função sugere um valor de $\lambda =$ `r round(autolambda,2)`.
 
+Apesar de haver uma sugestão de transformação, não é possível avaliar graficamente se houve uma diferença significativa no comportamento da série temporal excetuando-se a escala, como se pode ver nos eixos dos gráficos a seguir.
+
+```{r comparacao-transformacao-arima, fig.height=4.5, fig.width = 8}
+par(mfrow=c(1,2))
+plot(dados, main='Série original',ylab='')
+plot(dadosbc, main='Série transformada',ylab='')
 ```
 
-```{r aicc-transformado}
 
+Após aplicar a tranformação de Box-Cox na série, utilizou-se as funções *ndiffs()* e *nsdiffs()* para identificar quantas diferenciações simples e sazonais seriam necessárias para que a série se torne estacionária. Concluiu-se que são necessárias uma diferenciações simples e uma diferenciações sazonal, o que é confirmado pelo resultado do teste KPSS nos resíduos da série com as diferenças já aplicadas.
+
+
+```{r diff-arima-boxcox}
+# Diferencas (BC)
+# ndiffs(dadosbc)
+# dadosbc %>% diff() %>% nsdiffs()
+
+dadosbcdiff <- dadosbc %>% diff() %>% diff(lag = 12)
+
+fit2 <- Arima(dadosbc, order=c(2,1,2), seasonal=c(0,1,2))# modelo ajustado em etapa posterior da análise
+
+E2 <- window(fit2$residuals, start=c(1984,1))
+
+kpss.test(E2) %>% 
+  tidy()%>%
+  select(method, statistic, `p.value`) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2,
+    col.names = c("", "Estatística", "p-valor")
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
 ```
 
+O gráfico da ACF parece apresentar quebra no primeiro lag sazonal, enquanto o PACF tem quebra no segundo lag simples. Entretanto, os gráficos não evidenciam comportamentos claros para a série. Novamente, os resíduos parecem ter média igual a zero.
 
+```{r acf-pacf-arima-boxcox, fig.height=3, fig.width = 8}
+# Graficos de Autocorrelacao (BC)
+par(mfrow=c(1,3))
+plot(dadosbcdiff, main="Série (boxcox) com dif.",ylab="")
+acf(E2, lag=12*6, main="ACF")
+pacf(E2, lag=12*6, main="PACF")
+```
+
+Foram testadas combinações de $p$, $q$, $P$ e $Q$, com $d$ e $D$ fixados em 1 e, em seguida, selecionou-se o modelo ARIMA que apresentava menor valor do AICc. Temos, então, que o modelo escolhido para a série transformada é um $\text{ARIMA}(2,1,2)\times(0,1,2)_{12}$, assim como no caso da série sem transformação. Utilizando-se a função `auto.arima()` recebe-se uma sugestão de um modelo $ARIMA(3,1,1)\times(2,1,0)_{12}$ mas, assim como ocorre no modelo sem transformação, opta-se pelo modelo selecionado manualmente por apresentar um AICc menor.
+
+```{r aicc-arima-boxcox, include = FALSE}
+# Criterio de Akaike (BC)
+melhor_AICc <- Inf
+for(p in 0:2){
+  for(q in 0:2){
+    for(P in 0:2){
+      for(Q in 0:2){
+        #cat("p =",p,", q =",q,", P =",P,", Q =",Q,"\n")
+        tryCatch({fit <- Arima(dadosbc, order=c(p,1,q), seasonal=c(P,1,Q))}, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
+        if(fit$aicc <= melhor_AICc){
+          melhor_AICc <- fit$aicc
+          #cat("p =",p,", q =",q,", P =",P,", Q =",Q,", AICc =",fit$aicc,"\n")}
+        
+      }
+    }
+  }
+  }
+}
+# melhor_AICc
+
+# auto.arima(serie_ms)
+
+```
 
 ### Resíduos
+
+Foram retirados os zeros da inicialização para seguir com a análise dos resíduos. O gráfico da série dos resíduos sugere aleatoriedade e o QQ plot distribuição aproximadamente normal. Por último, o gráfico ACF mostra que a autocorrelação dos resíduos está dentro da banda de confiança, com exceção de um ponto que excede um pouco este limite.
+
+```{r residuos-arima-boxcox, fig.height=3, fig.width = 8}
+# Inicializacao
+# Analise de residuos
+par(mfrow=c(1,3))
+plot(E2, main="Resíduos (boxcox)",ylab="")
+qqnorm(E2)
+qqline(E2)
+acf(E,lag.max=12*6,main="ACF")
+```
+
+Assim como ocorre para a série não transformada, os testes de Shapiro-Wilk e Ljung-box com *lag* igual a 15 não apresentam indicação para rejeição de suas hipóteses nulas. Isto é, pode-se dizer que a série transformada tem distribuição normal e seus resíduos são independentes.
+
+```{r testes-arima-boxcox}
+#Testes
+box <- Box.test(E2,lag=15,type="Ljung-Box") %>% tidy() %>% select(method, everything()) %>% mutate(parameter = as.character(parameter)) #independencia
+shap <- shapiro.test(E2) %>% tidy() %>% mutate(parameter = "") %>% select(method, everything())  #normalidade
+
+bind_rows(box, shap) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2,
+    col.names = c("", "Estatística", "p-valor", "Lag")
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+
+rm(box, shap)
+```
 
 
 # Modelos ETS: seleção, transformações e resíduos
@@ -169,6 +346,8 @@ O modelo selecionado foi ARIMA(2,1,2)x(0,1,2) para a série original e com trans
 ## Modelo sem transformação
 
 ### Seleção
+
+Iniciamos a exploração do modelo 
 
 ```{r selecao-ETS-sem-transf}
 # monta as combinações possíveis de modelo ets
@@ -210,13 +389,13 @@ model_select <- model[selecionados,]
 tabela_modelos_ETS <- map2_df(model_select$modelo, model_select$damp, criterios) %>%
   arrange(AIC) %>%
   mutate(modelo = case_when(
-    damped == TRUE ~ str_replace(sigla, "A", "Ad"),
+    damped == TRUE ~ str_replace(sigla, ",A", ",Ad"),
     .default = sigla
   ))
 
 tabela_modelos_ETS %>%
   select("Modelo"= modelo, AIC:BIC)%>%
-  head(10) %>%
+  head(6) %>%
   knitr::kable(
     format = "latex",
     align = c("lccc"),
@@ -232,6 +411,8 @@ tabela_modelos_ETS %>%
       stripe_color = "gray!15")
 
 ```
+
+
 
 ```{r melhor-fit-ETL-sem-transf}
 
@@ -312,7 +493,7 @@ tabela_modelos_ETS_transf <- map2_df(model_select_transf$modelo, model_select_tr
 
 tabela_modelos_ETS_transf %>%
   select("Modelo transformado"= modelo, AIC:BIC)%>%
-  head(10) %>%
+  head(6) %>%
   knitr::kable(
     format = "latex",
     align = c("lccc"),
@@ -357,8 +538,15 @@ apresente em tabelas e gráficos as previsões dos 4 modelos selecionados e tamb
 
 # Apêndice
 
-Todo o projeto de composição deste documento pode ser encontrado aqui: https://github.com/cesar-galvao/trabalhos_series
+Todo o projeto de composição deste documento pode ser encontrado aqui: [https://github.com/cesar-galvao/trabalhos_series_temporais](https://github.com/cesar-galvao/trabalhos_series_temporais)
 
 ```{r codigo, eval = FALSE, echo = TRUE}
 
 ```
+
+```{r include = FALSE}
+rm(list = ls())
+gc()
+
+```
+
