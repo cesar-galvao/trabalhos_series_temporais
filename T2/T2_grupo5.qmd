@@ -343,6 +343,10 @@ rm(box, shap)
 
 # Modelos ETS: seleção, transformações e resíduos
 
+
+JUSTIFICAR USO DO AAA EM VEZ DO TOP AICC
+
+
 ## Modelo sem transformação
 
 ### Seleção
@@ -480,9 +484,9 @@ selecao do modelo com transformação
 #   print(try({ets(dados_box, model = model$modelo[i], damped = model$damp[i])}, silent = TRUE))
 # }
 
-selecionados_transf <- c(1, 2, 5, 6, 14, 18, 19:24, 27:30, 32, 34, 36)
+# selecionados_transf <- c(1, 2, 5, 6, 14, 18, 19:24, 27:30, 32, 34, 36)
 
-model_select_transf <- model[selecionados_transf,]
+model_select_transf <- model[selecionados,]
 
 tabela_modelos_ETS_transf <- map2_df(model_select_transf$modelo, model_select_transf$damp, criterios) %>%
   arrange(AIC) %>%
@@ -509,7 +513,7 @@ tabela_modelos_ETS_transf %>%
       stripe_color = "gray!15")
 ```
 
-OS MODELOS SAO OS MESMO, PODEMO SELECIONAR O SEGUNDO MELHOR
+MESMO MODELO, MAS COM TRANSFORMAÇÃO
 
 
 ### Resíduos
@@ -524,13 +528,149 @@ OS MODELOS SAO OS MESMO, PODEMO SELECIONAR O SEGUNDO MELHOR
 
 # Estudo de desempenho preditivo
 
+Para realizar a análise do desempenho preditivo usando uma abordagem de janela deslizante, o estudo considera uma janela de tamanho $n-14$ e calcula os erros de previsão para horizontes de até 5 períodos. Utilizando os modelos previamente mencionados para criar as funções de previsão, Os resultados são apresentados em um gráfico e uma tabela, mostrando os erros absolutos para cada horizonte de previsão.
+
 ## Resultados da Janela Deslizante
+```{r funcoes-previsao}
+# Definindo as funções de previsão
+
+# Arima
+f_arima <- function(y, h){
+fit = Arima(y, order=c(2,1,2), seasonal=c(0,1,2))
+return(forecast(fit, h))
+}
+
+# Arima com transformação
+f_arima_transf <- function(y, h){
+fit = Arima(y, order=c(2,1,2), seasonal=c(0,1,2), lambda = 0.712)
+forecast(fit, h)
+}
+
+# ETS
+f_ets <- function(y, h){
+fit = ets(y, model="AAA", damped = TRUE)
+forecast(fit, h)
+}
+
+# ETS com transformação
+f_ets_transf <- function(y, h){
+fit = ets(y, model="AAA", lambda = 0.712, damped = TRUE)
+forecast(fit, h)
+}
+```
+
+```{r erros-previsao}
+# Tamanho da série
+n <- length(dados)
+
+# Cálculo dos erros de previsão para cada método
+
+CV_arima <- tsCV(y = dados, forecastfunction = f_arima, h = 5, initial = n-14)
+
+CV_arima_transf <- tsCV(y = dados, forecastfunction = f_arima_transf,
+                       h = 5, initial = n-14)
+
+CV_ets <- tsCV(y = dados, forecastfunction = f_ets, h = 5, initial = n-14)
+
+CV_ets_transf <- tsCV(y = dados, forecastfunction = f_ets_transf,
+                     h = 5, initial = n-14)
+
+# Cálculo do erro absoluto médio (MAE) para cada horizonte de previsão ----
+
+#-------------- otimizado abaixo -------------#
+MAE_arima <- CV_arima %>% abs() %>% colMeans(na.rm=T)
+MAE_arima_transf <-  CV_arima_transf %>% abs() %>% colMeans(na.rm=T)
+MAE_ets <-  CV_ets %>% abs() %>% colMeans(na.rm=T)
+MAE_ets_transf <-  CV_ets_transf %>% abs() %>% colMeans(na.rm=T)
+
+tab <- cbind(as.numeric(MAE_arima), as.numeric(MAE_ets))
+tab_transf <- cbind(MAE_arima_transf, MAE_ets_transf)
+
+tab_erros <-  tibble(MAE_arima, MAE_ets, MAE_arima_transf, MAE_ets_transf)
+#-------------------------------------------#
+
+tab_erros <- tibble(
+  h = paste0("h=", c(1:5)),
+  MAE_arima = CV_arima %>% abs() %>% colMeans(na.rm=T),
+  MAE_arima_transf =  CV_arima_transf %>% abs() %>% colMeans(na.rm=T),
+  MAE_ets =  CV_ets %>% abs() %>% colMeans(na.rm=T),
+  MAE_ets_transf =  CV_ets_transf %>% abs() %>% colMeans(na.rm=T),
+)
+
+
+tab_erros %>%
+  knitr::kable(
+    format = "latex",
+    align = c("c"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    col.names = c('', 'ARIMA', 'ETS', 'ARIMA Transformada', 'ETS Transformada'),
+    digits = 3
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+```
+
+VER PQ A ETS_TRANSF ESTÁ DANDO TUDO NA
 
 ## Performance em relação aos horizontes de previsão
 
-### ARIMA
+```{r}
+tab_erros %>%
+  select(-h) %>%
+  plot.ts(plot.type='s',col=1:4,lwd=2,xlab="h",ylab="MAE")
+legend(x=1,y=0.44, legend=c("ARIMA", "ETS", "ARIMA Transformada", "ETS Transformada"), col=1:4, lwd=2)
+```
 
-### ETS
+ARRUMAR A LEGENDA E OS VALORES E DEPOIS FAZER A ANÁLISE
+
+
+# Gráficos da previsão pontual e da previsão intervalar dos 4 modelos selecionados
+
+```{r previsao-pontual}
+# Verificando o h
+h <- M3[[id]]$h
+
+# Gráficos de previsão pontual e intervalar
+
+# ARIMA
+arima_prev95 <- f_arima(dados, h)
+
+plot(arima_prev95, main = "Previsão 95% de probabilidade de cobertura")
+arima_prev95
+
+# ARIMA com transformação
+arima_transf_prev95 <- f_arima_transf(dados, h)
+
+plot(arima_transf_prev95, main = "Previsão 95% de probabilidade de cobertura")
+arima_transf_prev95
+
+# ETS
+ets_prev95 <- f_ets(dados, h)
+
+plot(ets_prev95, main = "Previsão 95% de probabilidade de cobertura")
+ets_prev95
+
+# ETS com transformação
+ets_transf_prev95 <- f_ets_transf(dados, h)
+
+plot(ets_transf_prev95, main = "Previsão 95% de probabilidade de cobertura")
+ets_transf_prev95
+
+```
+
+ARRUMAR O ERRO NO ETS_TRANSF 
+
+```{r}
+
+```
+
+COLOCAR INTERPRETAÇÃO
+
 
 # Resultados
 
