@@ -821,7 +821,100 @@ ets_transf_prev95 %>%
 
 # Resultados
 
-apresente em tabelas e gráficos as previsões dos 4 modelos selecionados e também apresente em uma tabela os resultados de acurácia dos 4 modelos selecionados e dos modelos benchmarks. Comente os resultados de modo objetivo;
+Foi utilizada a métrica do erro absoluto médio (MAE) para comparar o desempenho preditivo dos modelos selecionados com alguns *benchmarks* da biblioteca *forecast*. Estes valores estão apresentados no gráfico abaixo e evidenciam uma melhor performance do modelo gerado pela função automática *auto.arima()*, seguido pelos modelos ARIMA selecionados manualmente.  
+
+  
+
+
+```{r mae-benchmarks}
+## MAE (Benchmarks)
+
+n <- length(dados)
+
+# auto.arima
+f_auto_arima <- function(y, h){
+  fit = auto.arima(y)
+  forecast(fit, h)
+}
+
+CV_auto_arima <- tsCV(y=dados,forecastfunction=f_auto_arima,h=5,initial=n-14)
+
+# ses
+f_ses <- function(y, h){
+  ses(y,h)
+}
+CV_ses <- tsCV(y=dados,forecastfunction=f_ses,h=5,initial=n-14)
+
+# holt
+f_holt <- function(y, h){
+  holt(y,h)
+}
+CV_holt <- tsCV(y=dados,forecastfunction=f_holt,h=5,initial=n-14)
+
+# ets
+f_auto_ets <- function(y, h){
+  fit = ets(y)
+  forecast(fit, h)
+}
+CV_auto_ets <- tsCV(y=dados,forecastfunction=f_auto_ets,h=5,initial=n-14)
+
+# stlf
+f_stlf <- function(y, h){
+  stlf(y,h)
+}
+CV_stlf <- tsCV(y=dados,forecastfunction=f_stlf,h=5,initial=n-14)
+
+# bats
+f_bats <- function(y, h){
+  fit = bats(y)
+  forecast(fit, h)
+}
+CV_bats <- tsCV(y=dados,forecastfunction=f_bats,h=5,initial=n-14)
+
+# tbats
+f_tbats <- function(y, h){
+  fit = tbats(y)
+  forecast(fit, h)
+}
+CV_tbats <- tsCV(y=dados,forecastfunction=f_tbats,h=5,initial=n-14)
+
+# tabela
+tabela <- tibble(
+  h = paste0("h=", c(1:5)),
+  MAE_arima = CV_arima %>% abs() %>% colMeans(na.rm=T),
+  MAE_arima_transf =  CV_arima_transf %>% abs() %>% colMeans(na.rm=T),
+  MAE_ets =  CV_ets %>% abs() %>% colMeans(na.rm=T),
+  MAE_ets_transf =  CV_ets_transf %>% abs() %>% colMeans(na.rm=T),
+  MAE_auto_arima = CV_auto_arima %>% abs() %>% colMeans(na.rm=T),
+  MAE_ses = CV_ses %>% abs() %>% colMeans(na.rm=T),
+  MAE_holt = CV_holt %>% abs() %>% colMeans(na.rm=T),
+  MAE_auto_ets = CV_auto_ets %>% abs() %>% colMeans(na.rm=T),
+  MAE_stlf = CV_stlf %>% abs() %>% colMeans(na.rm=T),
+  MAE_bats = CV_bats %>% abs() %>% colMeans(na.rm=T),
+  MAE_tbats = CV_tbats %>% abs() %>% colMeans(na.rm=T),
+)
+
+```
+
+```{r mae-grafico, fig.height=3, fig.width = 4.5, fig.align='center'}
+# MAE (grafico)
+tabela %>%
+  pivot_longer(cols = -h, names_to = "Modelo", values_to = "values")%>%
+  mutate(
+    Modelo = str_remove_all(Modelo, "MAE_"),
+    h = str_remove_all(h, "h="),
+    h = as.integer(h)) %>%
+  ggplot(aes(h, values, color = Modelo))+
+  geom_line()+
+  labs(y = "MAE")+
+  theme_bw()
+```
+
+
+# Conclusão
+
+Neste estudo de caso, a performance dos modelos ARIMA é superior aos demais modelos selecionados manualmente em todos os horizontes de previsão. Ainda, como é possível observar no gráfico de comparação com os *benchmarks*, as funções do grupo arima parecem se comportar como um grupo separado com desempenho melhor que as demais, pelo menos até um horizonte de previsão $h=5$. Para esta série, portanto, indica-se um modelo ARIMA obtido pela função `auto.arima()`.
+
 
 # Apêndice
 
@@ -1425,6 +1518,85 @@ ets_transf_prev95 %>%
       digits = 2,
       col.names = c("Período (mês/ano)", "Prev. Pontual", "LI", "LS", "LI", "LS")) %>%
     add_header_above(c(" " = 2, "IC para 80%" = 2, "IC para 95%" = 2))
+
+## MAE (Benchmarks)
+
+n <- length(dados)
+
+# auto.arima
+f_auto_arima <- function(y, h){
+  fit = auto.arima(y)
+  forecast(fit, h)
+}
+
+CV_auto_arima <- tsCV(y=dados,forecastfunction=f_auto_arima,h=5,initial=n-14)
+
+# ses
+f_ses <- function(y, h){
+  ses(y,h)
+}
+CV_ses <- tsCV(y=dados,forecastfunction=f_ses,h=5,initial=n-14)
+
+# holt
+f_holt <- function(y, h){
+  holt(y,h)
+}
+CV_holt <- tsCV(y=dados,forecastfunction=f_holt,h=5,initial=n-14)
+
+# ets
+f_auto_ets <- function(y, h){
+  fit = ets(y)
+  forecast(fit, h)
+}
+CV_auto_ets <- tsCV(y=dados,forecastfunction=f_auto_ets,h=5,initial=n-14)
+
+# stlf
+f_stlf <- function(y, h){
+  stlf(y,h)
+}
+CV_stlf <- tsCV(y=dados,forecastfunction=f_stlf,h=5,initial=n-14)
+
+# bats
+f_bats <- function(y, h){
+  fit = bats(y)
+  forecast(fit, h)
+}
+CV_bats <- tsCV(y=dados,forecastfunction=f_bats,h=5,initial=n-14)
+
+# tbats
+f_tbats <- function(y, h){
+  fit = tbats(y)
+  forecast(fit, h)
+}
+CV_tbats <- tsCV(y=dados,forecastfunction=f_tbats,h=5,initial=n-14)
+
+# tabela
+tabela <- tibble(
+  h = paste0("h=", c(1:5)),
+  MAE_arima = CV_arima %>% abs() %>% colMeans(na.rm=T),
+  MAE_arima_transf =  CV_arima_transf %>% abs() %>% colMeans(na.rm=T),
+  MAE_ets =  CV_ets %>% abs() %>% colMeans(na.rm=T),
+  MAE_ets_transf =  CV_ets_transf %>% abs() %>% colMeans(na.rm=T),
+  MAE_auto_arima = CV_auto_arima %>% abs() %>% colMeans(na.rm=T),
+  MAE_ses = CV_ses %>% abs() %>% colMeans(na.rm=T),
+  MAE_holt = CV_holt %>% abs() %>% colMeans(na.rm=T),
+  MAE_auto_ets = CV_auto_ets %>% abs() %>% colMeans(na.rm=T),
+  MAE_stlf = CV_stlf %>% abs() %>% colMeans(na.rm=T),
+  MAE_bats = CV_bats %>% abs() %>% colMeans(na.rm=T),
+  MAE_tbats = CV_tbats %>% abs() %>% colMeans(na.rm=T),
+)
+
+# MAE (grafico)
+tabela %>%
+  pivot_longer(cols = -h, names_to = "Modelo", values_to = "values")%>%
+  mutate(
+    Modelo = str_remove_all(Modelo, "MAE_"),
+    h = str_remove_all(h, "h="),
+    h = as.integer(h)) %>%
+  ggplot(aes(h, values, color = Modelo))+
+  geom_line()+
+  labs(y = "MAE")+
+  theme_bw()
 
 ```
 

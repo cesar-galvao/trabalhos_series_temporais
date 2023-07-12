@@ -217,7 +217,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[breakable, interior hidden, borderline west={3pt}{0pt}{shadecolor}, enhanced, boxrule=0pt, frame hidden, sharp corners]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[boxrule=0pt, breakable, sharp corners, interior hidden, borderline west={3pt}{0pt}{shadecolor}, enhanced, frame hidden]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -869,10 +869,31 @@ Feb 1994 & 4955.39 & 3995.84 & 5971.87 & 3512.73 & 6531.48\\
 \hypertarget{resultados}{%
 \section{Resultados}\label{resultados}}
 
-apresente em tabelas e gráficos as previsões dos 4 modelos selecionados
-e também apresente em uma tabela os resultados de acurácia dos 4 modelos
-selecionados e dos modelos benchmarks. Comente os resultados de modo
-objetivo;
+Foi utilizada a métrica do erro absoluto médio (MAE) para comparar o
+desempenho preditivo dos modelos selecionados com alguns
+\emph{benchmarks} da biblioteca \emph{forecast}. Estes valores estão
+apresentados no gráfico abaixo e evidenciam uma melhor performance do
+modelo gerado pela função automática \emph{auto.arima()}, seguido pelos
+modelos ARIMA selecionados manualmente.
+
+\begin{figure}
+
+{\centering \includegraphics{T2_grupo5_files/figure-pdf/mae-grafico-1.pdf}
+
+}
+
+\end{figure}
+
+\hypertarget{conclusuxe3o}{%
+\section{Conclusão}\label{conclusuxe3o}}
+
+Neste estudo de caso, a performance dos modelos ARIMA é superior aos
+demais modelos selecionados manualmente em todos os horizontes de
+previsão. Ainda, como é possível observar no gráfico de comparação com
+os \emph{benchmarks}, as funções do grupo arima parecem se comportar
+como um grupo separado com desempenho melhor que as demais, pelo menos
+até um horizonte de previsão \(h=5\). Para esta série, portanto,
+indica-se um modelo ARIMA obtido pela função \texttt{auto.arima()}.
 
 \hypertarget{apuxeandice}{%
 \section{Apêndice}\label{apuxeandice}}
@@ -1476,6 +1497,85 @@ Todo o projeto de composição deste documento pode ser encontrado aqui:
       \AttributeTok{digits =} \DecValTok{2}\NormalTok{,}
       \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"Período (mês/ano)"}\NormalTok{, }\StringTok{"Prev. Pontual"}\NormalTok{, }\StringTok{"LI"}\NormalTok{, }\StringTok{"LS"}\NormalTok{, }\StringTok{"LI"}\NormalTok{, }\StringTok{"LS"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
     \FunctionTok{add\_header\_above}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{" "} \OtherTok{=} \DecValTok{2}\NormalTok{, }\StringTok{"IC para 80\%"} \OtherTok{=} \DecValTok{2}\NormalTok{, }\StringTok{"IC para 95\%"} \OtherTok{=} \DecValTok{2}\NormalTok{))}
+
+\DocumentationTok{\#\# MAE (Benchmarks)}
+
+\NormalTok{n }\OtherTok{\textless{}{-}} \FunctionTok{length}\NormalTok{(dados)}
+
+\CommentTok{\# auto.arima}
+\NormalTok{f\_auto\_arima }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, h)\{}
+\NormalTok{  fit }\OtherTok{=} \FunctionTok{auto.arima}\NormalTok{(y)}
+  \FunctionTok{forecast}\NormalTok{(fit, h)}
+\NormalTok{\}}
+
+\NormalTok{CV\_auto\_arima }\OtherTok{\textless{}{-}} \FunctionTok{tsCV}\NormalTok{(}\AttributeTok{y=}\NormalTok{dados,}\AttributeTok{forecastfunction=}\NormalTok{f\_auto\_arima,}\AttributeTok{h=}\DecValTok{5}\NormalTok{,}\AttributeTok{initial=}\NormalTok{n}\DecValTok{{-}14}\NormalTok{)}
+
+\CommentTok{\# ses}
+\NormalTok{f\_ses }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, h)\{}
+  \FunctionTok{ses}\NormalTok{(y,h)}
+\NormalTok{\}}
+\NormalTok{CV\_ses }\OtherTok{\textless{}{-}} \FunctionTok{tsCV}\NormalTok{(}\AttributeTok{y=}\NormalTok{dados,}\AttributeTok{forecastfunction=}\NormalTok{f\_ses,}\AttributeTok{h=}\DecValTok{5}\NormalTok{,}\AttributeTok{initial=}\NormalTok{n}\DecValTok{{-}14}\NormalTok{)}
+
+\CommentTok{\# holt}
+\NormalTok{f\_holt }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, h)\{}
+  \FunctionTok{holt}\NormalTok{(y,h)}
+\NormalTok{\}}
+\NormalTok{CV\_holt }\OtherTok{\textless{}{-}} \FunctionTok{tsCV}\NormalTok{(}\AttributeTok{y=}\NormalTok{dados,}\AttributeTok{forecastfunction=}\NormalTok{f\_holt,}\AttributeTok{h=}\DecValTok{5}\NormalTok{,}\AttributeTok{initial=}\NormalTok{n}\DecValTok{{-}14}\NormalTok{)}
+
+\CommentTok{\# ets}
+\NormalTok{f\_auto\_ets }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, h)\{}
+\NormalTok{  fit }\OtherTok{=} \FunctionTok{ets}\NormalTok{(y)}
+  \FunctionTok{forecast}\NormalTok{(fit, h)}
+\NormalTok{\}}
+\NormalTok{CV\_auto\_ets }\OtherTok{\textless{}{-}} \FunctionTok{tsCV}\NormalTok{(}\AttributeTok{y=}\NormalTok{dados,}\AttributeTok{forecastfunction=}\NormalTok{f\_auto\_ets,}\AttributeTok{h=}\DecValTok{5}\NormalTok{,}\AttributeTok{initial=}\NormalTok{n}\DecValTok{{-}14}\NormalTok{)}
+
+\CommentTok{\# stlf}
+\NormalTok{f\_stlf }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, h)\{}
+  \FunctionTok{stlf}\NormalTok{(y,h)}
+\NormalTok{\}}
+\NormalTok{CV\_stlf }\OtherTok{\textless{}{-}} \FunctionTok{tsCV}\NormalTok{(}\AttributeTok{y=}\NormalTok{dados,}\AttributeTok{forecastfunction=}\NormalTok{f\_stlf,}\AttributeTok{h=}\DecValTok{5}\NormalTok{,}\AttributeTok{initial=}\NormalTok{n}\DecValTok{{-}14}\NormalTok{)}
+
+\CommentTok{\# bats}
+\NormalTok{f\_bats }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, h)\{}
+\NormalTok{  fit }\OtherTok{=} \FunctionTok{bats}\NormalTok{(y)}
+  \FunctionTok{forecast}\NormalTok{(fit, h)}
+\NormalTok{\}}
+\NormalTok{CV\_bats }\OtherTok{\textless{}{-}} \FunctionTok{tsCV}\NormalTok{(}\AttributeTok{y=}\NormalTok{dados,}\AttributeTok{forecastfunction=}\NormalTok{f\_bats,}\AttributeTok{h=}\DecValTok{5}\NormalTok{,}\AttributeTok{initial=}\NormalTok{n}\DecValTok{{-}14}\NormalTok{)}
+
+\CommentTok{\# tbats}
+\NormalTok{f\_tbats }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, h)\{}
+\NormalTok{  fit }\OtherTok{=} \FunctionTok{tbats}\NormalTok{(y)}
+  \FunctionTok{forecast}\NormalTok{(fit, h)}
+\NormalTok{\}}
+\NormalTok{CV\_tbats }\OtherTok{\textless{}{-}} \FunctionTok{tsCV}\NormalTok{(}\AttributeTok{y=}\NormalTok{dados,}\AttributeTok{forecastfunction=}\NormalTok{f\_tbats,}\AttributeTok{h=}\DecValTok{5}\NormalTok{,}\AttributeTok{initial=}\NormalTok{n}\DecValTok{{-}14}\NormalTok{)}
+
+\CommentTok{\# tabela}
+\NormalTok{tabela }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}
+  \AttributeTok{h =} \FunctionTok{paste0}\NormalTok{(}\StringTok{"h="}\NormalTok{, }\FunctionTok{c}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{)),}
+  \AttributeTok{MAE\_arima =}\NormalTok{ CV\_arima }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+  \AttributeTok{MAE\_arima\_transf =}\NormalTok{  CV\_arima\_transf }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+  \AttributeTok{MAE\_ets =}\NormalTok{  CV\_ets }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+  \AttributeTok{MAE\_ets\_transf =}\NormalTok{  CV\_ets\_transf }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+  \AttributeTok{MAE\_auto\_arima =}\NormalTok{ CV\_auto\_arima }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+  \AttributeTok{MAE\_ses =}\NormalTok{ CV\_ses }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+  \AttributeTok{MAE\_holt =}\NormalTok{ CV\_holt }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+  \AttributeTok{MAE\_auto\_ets =}\NormalTok{ CV\_auto\_ets }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+  \AttributeTok{MAE\_stlf =}\NormalTok{ CV\_stlf }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+  \AttributeTok{MAE\_bats =}\NormalTok{ CV\_bats }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+  \AttributeTok{MAE\_tbats =}\NormalTok{ CV\_tbats }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+\NormalTok{)}
+
+\CommentTok{\# MAE (grafico)}
+\NormalTok{tabela }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\AttributeTok{cols =} \SpecialCharTok{{-}}\NormalTok{h, }\AttributeTok{names\_to =} \StringTok{"Modelo"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"values"}\NormalTok{)}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{Modelo =} \FunctionTok{str\_remove\_all}\NormalTok{(Modelo, }\StringTok{"MAE\_"}\NormalTok{),}
+    \AttributeTok{h =} \FunctionTok{str\_remove\_all}\NormalTok{(h, }\StringTok{"h="}\NormalTok{),}
+    \AttributeTok{h =} \FunctionTok{as.integer}\NormalTok{(h)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(h, values, }\AttributeTok{color =}\NormalTok{ Modelo))}\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{y =} \StringTok{"MAE"}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
