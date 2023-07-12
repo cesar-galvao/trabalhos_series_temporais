@@ -431,8 +431,6 @@ Uma análise visual dos resíduos indica comportamento aleatório em torno de ze
 
 ```{r residuos-ets-sem-transform, fig.height=5, fig.width = 7, fig.align='center'}
 
-#ESSE É O CODIGO DO TRABALHO QUE CONSEGUIMOS, TEM QUE TROCAR OS OBJETOS
-
 # Análise de resíduos ETS sem transformação
 E3 <- fit_ets$residuals
 par(mfrow=c(2,2))
@@ -749,7 +747,7 @@ arima_prev95 %>%
 ```
 {{< pagebreak >}}
 
-## ARIMA com tranformação
+## ARIMA com transformação
 ```{r previsao-pontual-arima-transf, fig.align='center', fig.height=3}
 # ARIMA com transformação
 arima_transf_prev95 <- f_arima_transf(dados, h)
@@ -827,9 +825,606 @@ apresente em tabelas e gráficos as previsões dos 4 modelos selecionados e tamb
 
 # Apêndice
 
-Todo o projeto de composição deste documento pode ser encontrado aqui: [https://github.com/cesar-galvao/trabalhos_series_temporais](https://github.com/cesar-galvao/trabalhos_series_temporais)
+Todo o projeto de composição deste documento pode ser encontrado aqui: [https://github.com/cesar-galvao/trabalhos_series_temporais](https://github.com/cesar-galvao/trabalhos_series_temporais)  
+
+
 
 ```{r codigo, eval = FALSE, echo = TRUE}
+
+if(!("pacman" %in% installed.packages())){install.packages("pacman")}
+
+pacman::p_load(Mcomp, tidyverse, forecast, fpp2, xts, tseries, tidymodels, kableExtra)
+
+
+
+data(M3) #carrega os dados
+id <- 2183 #série temporal escolhida
+
+serie <- M3[[id]]
+
+dados <- serie$x
+
+plot(serie, main = "Série Temporal M3-2183")
+
+
+
+serie_ms <- forecast::msts(dados, seasonal.periods = c(12))
+
+# media dos resíduos é em torno de 5. Considerando a magnitude dos dados que temos usando summary(dados), está próximo de zero o suficiente
+
+#tentei períodos secundários, porém o melhor ajuste é com apenas um ciclo anual. Só é possível dois ciclos secundários completos para análise até quadrienal, mas até aí todos apresentam resíduos inadequados. 
+
+decomp_mstl <- mstl(serie_ms, lambda = NULL, t.window = 9)
+
+#ajustar com lambda = "auto" até agora não parece fazer qualquer diferença
+
+
+
+decomp_mstl %>% autoplot(main = "Decomposição MSTL com período anual simples") + labs(x = "Ano") + theme_bw()
+
+
+# diferenciacoes comuns
+# ndiffs(serie_ms)
+
+#diferenciacoes sazonais
+# serie_ms %>% diff() %>% nsdiffs()
+
+serie_ms_diff <- serie_ms %>% diff() %>% diff(lag = 12)
+
+# Inicializacao dos resíduos
+fit <- Arima(dados, order=c(2,1,2), seasonal=c(0,1,2)) #modelo selecionado em outro estágio da análise
+E <- window(fit$residuals, start=c(1984,1))
+
+kpss.test(E) %>% 
+  tidy()%>%
+  select(method, statistic, `p.value`) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2,
+    col.names = c("", "Estatística", "p-valor")
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+
+
+# Graficos de Autocorrelacao
+par(mfrow=c(1,3))
+plot(serie_ms_diff, main="Série com diferenças",ylab="")
+acf(serie_ms_diff, lag=12*6, main="ACF")
+pacf(serie_ms_diff, lag=12*6, main="PACF")
+
+melhor_AICc <- Inf
+for(p in 0:2){
+  for(q in 0:2){
+    for(P in 0:2){
+      for(Q in 0:2){
+        
+        #cat("p =",p,", q =",q,", P =",P,", Q =",Q,"\n")
+        
+        tryCatch({fit <- Arima(serie_ms, order=c(p,1,q), seasonal=c(P,1,Q))}, error=function(e){cat("",conditionMessage(e), "\n")})
+        
+        if(fit$aicc <= melhor_AICc){
+          melhor_AICc <- fit$aicc
+          #cat("p =",p,", q =",q,", P =",P,", Q =",Q,", AICc =",fit$aicc,"\n")
+          }
+        
+      }
+    }
+  }
+}
+
+#melhor_AICc
+
+# teste com auto.arima para verificar
+#auto.arima(serie_ms)
+
+
+# Analise de residuos
+par(mfrow=c(1,3))
+plot(E, main="Resíduos",ylab="")
+qqnorm(E)
+qqline(E)
+acf(E,lag.max=12*6,main="ACF")
+
+
+#Testes
+box <- Box.test(E,lag=15,type="Ljung-Box") %>% tidy() %>% select(method, everything()) %>% mutate(parameter = as.character(parameter)) #independencia
+shap <- shapiro.test(E) %>% tidy() %>% mutate(parameter = "") %>% select(method, everything())  #normalidade
+
+bind_rows(box, shap) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2,
+    col.names = c("", "Estatística", "p-valor", "Lag")
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+
+rm(box, shap)
+
+
+# Transformacao de Box-Cox
+autolambda <- BoxCox.lambda(dados)
+dadosbc <- BoxCox(dados, lambda=autolambda)
+
+
+par(mfrow=c(1,2))
+plot(dados, main='Série original',ylab='')
+plot(dadosbc, main='Série transformada',ylab='')
+
+
+# Diferencas (BC)
+# ndiffs(dadosbc)
+# dadosbc %>% diff() %>% nsdiffs()
+
+dadosbcdiff <- dadosbc %>% diff() %>% diff(lag = 12)
+
+fit2 <- Arima(dadosbc, order=c(2,1,2), seasonal=c(0,1,2))# modelo ajustado em etapa posterior da análise
+
+E2 <- window(fit2$residuals, start=c(1984,1))
+
+kpss.test(E2) %>% 
+  tidy()%>%
+  select(method, statistic, `p.value`) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2,
+    col.names = c("", "Estatística", "p-valor")
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+
+
+# Graficos de Autocorrelacao (BC)
+par(mfrow=c(1,3))
+plot(dadosbcdiff, main="Série (boxcox) com dif.",ylab="")
+acf(dadosbcdiff, lag=12*6, main="ACF")
+pacf(dadosbcdiff, lag=12*6, main="PACF")
+
+
+# Criterio de Akaike (BC)
+melhor_AICc <- Inf
+for(p in 0:2){
+  for(q in 0:2){
+    for(P in 0:2){
+      for(Q in 0:2){
+        #cat("p =",p,", q =",q,", P =",P,", Q =",Q,"\n")
+        tryCatch({fit <- Arima(dadosbc, order=c(p,1,q), seasonal=c(P,1,Q))}, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
+        if(fit$aicc <= melhor_AICc){
+          melhor_AICc <- fit$aicc
+          #cat("p =",p,", q =",q,", P =",P,", Q =",Q,", AICc =",fit$aicc,"\n")}
+        
+      }
+    }
+  }
+  }
+}
+# melhor_AICc
+
+# auto.arima(serie_ms)
+
+
+# Inicializacao
+# Analise de residuos
+par(mfrow=c(1,3))
+plot(E2, main="Resíduos (boxcox)",ylab="")
+qqnorm(E2)
+qqline(E2)
+acf(E,lag.max=12*6,main="ACF")
+
+
+#Testes
+box <- Box.test(E2,lag=15,type="Ljung-Box") %>% tidy() %>% select(method, everything()) %>% mutate(parameter = as.character(parameter)) #independencia
+shap <- shapiro.test(E2) %>% tidy() %>% mutate(parameter = "") %>% select(method, everything())  #normalidade
+
+bind_rows(box, shap) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2,
+    col.names = c("", "Estatística", "p-valor", "Lag")
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+
+rm(box, shap)
+
+
+# monta as combinações possíveis de modelo ets
+model <- expand_grid(v1 = c("A", "M", "N"), v2 = c("A", "M", "N"), v3 = c("A", "M", "N")) %>%
+  mutate(modelo = str_c(v1,v2,v3)) %>%
+  select(modelo) %>%
+  unique() %>%
+  expand_grid(., damp = c(TRUE, FALSE))
+# N, A, M, + damped
+
+
+#funcao pra montar indicadores do modelo
+criterios <- function(modelo, damp, dados) { 
+  ETS <- ets(dados, model = modelo, damped = damp)
+  #usamos o objeto dados como um padrao
+  
+  tabela <- tibble(
+    nome = modelo,
+    sigla = str_c("ETS(", str_c(substr(modelo,1,1),  substr(modelo,2,2), substr(modelo,3,3), sep = ","), ")"),
+    damped = damp,
+    AIC = ETS$aic, 
+    AICc = ETS$aicc, 
+    BIC = ETS$bic)
+  
+  return(tabela)
+}
+
+
+#selecionando modelos permitidos pela funcao ets
+# for(i in 1:length(model$modelo)){
+#   print(i)
+#   print(try({ets(dados, model = model$modelo[i], damped = model$damp[i])}, silent = TRUE))
+# }
+
+selecionados <- c(1, 2, 5, 6, 14, 18:24, 27:30, 32, 34, 36)
+
+model_select <- model[selecionados,]
+
+tabela_modelos_ETS <- map2_df(model_select$modelo, model_select$damp, criterios, dados) %>%
+  arrange(AIC) %>%
+  mutate(modelo = case_when(
+    damped == TRUE ~ str_replace(sigla, ",A", ",Ad"),
+    .default = sigla
+  ))
+
+tabela_modelos_ETS %>%
+  select("Modelo"= modelo, AIC:BIC)%>%
+  head(6) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+
+
+
+# decomposicao ETS sem transformacao ----
+fit_ets <- ets(dados, model = "AAA", damped = TRUE)
+
+plot(fit_ets)
+
+
+# Análise de resíduos ETS sem transformação
+E3 <- fit_ets$residuals
+par(mfrow=c(2,2))
+plot(E3, main = "Resíduos")
+acf(E3)
+pacf(E3)
+qqnorm(E3)
+qqline(E3)
+
+
+# # Testes para ETS sem transformação
+box <- Box.test(E3,lag=15,type="Ljung-Box") %>% tidy() %>% select(method, everything()) %>% mutate(parameter = as.character(parameter)) #independencia
+shap <- shapiro.test(E3) %>% tidy() %>% mutate(parameter = "") %>% select(method, everything())  #normalidade
+kpss <- kpss.test(E3) %>% tidy() %>% select(method, everything()) %>% mutate(parameter = as.character(parameter))
+
+bind_rows(kpss,box, shap) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2,
+    col.names = c("", "Estatística", "p-valor", "Lag")
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+
+rm(box, shap, kpss)
+
+
+# avalia valor de lambda da transformacao boxcox
+lambda <- dados %>% BoxCox.lambda()
+
+dados_box <- dados %>% BoxCox(lambda)
+
+
+# visualização e decomp da ETS com transformação
+plot(dados_box,main= parse(text = paste0('"Série com transformação Box-Cox  "', '~ lambda == ', round(lambda, 3))))
+
+
+# for(i in 1:length(model$modelo)){
+#   print(i)
+#   print(try({ets(dados_box, model = model$modelo[i], damped = model$damp[i])}, silent = TRUE))
+# }
+
+# selecionados_transf <- c(1, 2, 5, 6, 14, 18, 19:24, 27:30, 32, 34, 36)
+
+model_select_transf <- model[selecionados,]
+
+tabela_modelos_ETS_transf <- map2_df(model_select_transf$modelo, model_select_transf$damp, criterios, dados_box) %>%
+  arrange(AIC) %>%
+  mutate(modelo = case_when(
+    damped == TRUE ~ str_replace(sigla, ",A", ",Ad"),
+    .default = sigla
+  ))
+
+tabela_modelos_ETS_transf %>%
+  select("Modelo transformado"= modelo, AIC:BIC)%>%
+  head(6) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+
+
+fit_ets_box <- ets(dados_box, model = "AAA", damped = TRUE)
+
+plot(fit_ets_box)
+
+
+E4 <- fit_ets_box$residuals
+par(mfrow=c(2,2))
+plot(E4, main = "Resíduos")
+acf(E4)
+pacf(E4)
+qqnorm(E4)
+qqline(E4)
+
+
+# # Testes para ETS com transformação
+box <- Box.test(E4,lag=15,type="Ljung-Box") %>% tidy() %>% select(method, everything()) %>% mutate(parameter = as.character(parameter)) #independencia
+shap <- shapiro.test(E4) %>% tidy() %>% mutate(parameter = "") %>% select(method, everything())  #normalidade
+kpss <- kpss.test(E4) %>% tidy() %>% select(method, everything()) %>% mutate(parameter = as.character(parameter))
+
+bind_rows(kpss,box, shap) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2,
+    col.names = c("", "Estatística", "p-valor", "Lag")
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+
+rm(box, shap, kpss)
+
+
+# Definindo as funções de previsão
+
+# Arima
+f_arima <- function(y, h){
+fit = Arima(y, order=c(2,1,2), seasonal=c(0,1,2))
+return(forecast(fit, h))
+}
+
+# Arima com transformação
+f_arima_transf <- function(y, h){
+fit = Arima(y, order=c(2,1,2), seasonal=c(0,1,2), lambda = 0.712)
+forecast(fit, h)
+}
+
+# ETS
+f_ets <- function(y, h){
+fit = ets(y, model="AAA", damped = TRUE)
+forecast(fit, h)
+}
+
+# ETS com transformação
+f_ets_transf <- function(y, h){
+fit = ets(y, model="AAA", lambda = 0.712, damped = TRUE)
+forecast(fit, h)
+}
+
+
+# Tamanho da série
+n <- length(dados)
+
+# Cálculo dos erros de previsão para cada método
+
+CV_arima <- tsCV(y = dados, forecastfunction = f_arima, h = 5, initial = n-14)
+
+CV_arima_transf <- tsCV(y = dados, forecastfunction = f_arima_transf,
+                       h = 5, initial = n-14)
+
+CV_ets <- tsCV(y = dados, forecastfunction = f_ets, h = 5, initial = n-14)
+
+CV_ets_transf <- tsCV(y = dados, forecastfunction = f_ets_transf,
+                     h = 5, initial = n-14)
+
+# Cálculo do erro absoluto médio (MAE) para cada horizonte de previsão ----
+
+#-------------- otimizado abaixo -------------#
+# MAE_arima <- CV_arima %>% abs() %>% colMeans(na.rm=T)
+# MAE_arima_transf <-  CV_arima_transf %>% abs() %>% colMeans(na.rm=T)
+# MAE_ets <-  CV_ets %>% abs() %>% colMeans(na.rm=T)
+# MAE_ets_transf <-  CV_ets_transf %>% abs() %>% colMeans(na.rm=T)
+# 
+# tab <- cbind(as.numeric(MAE_arima), as.numeric(MAE_ets))
+# tab_transf <- cbind(MAE_arima_transf, MAE_ets_transf)
+# 
+# tab_erros <-  tibble(MAE_arima, MAE_ets, MAE_arima_transf, MAE_ets_transf)
+#-------------------------------------------#
+
+tab_erros <- tibble(
+  h = paste0("h=", c(1:5)),
+  MAE_arima = CV_arima %>% abs() %>% colMeans(na.rm=T),
+  MAE_arima_transf =  CV_arima_transf %>% abs() %>% colMeans(na.rm=T),
+  MAE_ets =  CV_ets %>% abs() %>% colMeans(na.rm=T),
+  MAE_ets_transf =  CV_ets_transf %>% abs() %>% colMeans(na.rm=T),
+)
+
+
+tab_erros %>%
+  knitr::kable(
+    format = "latex",
+    align = c("c"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    col.names = c('', 'ARIMA', 'ETS', 'ARIMA Transformada', 'ETS Transformada'),
+    digits = 3
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+
+
+tab_erros %>%
+  pivot_longer(cols = -h, names_to = "Modelo", values_to = "values")%>%
+  mutate(
+    Modelo = str_remove_all(Modelo, "MAE_"),
+    h = str_remove_all(h, "h="),
+    h = as.integer(h)) %>%
+  ggplot(aes(h, values, color = Modelo))+
+  geom_line()+
+  labs(y = "MAE")+
+  theme_bw()
+
+
+# Verificando o h
+h <- M3[[id]]$h
+
+# Gráficos de previsão pontual e intervalar
+
+# ARIMA
+arima_prev95 <- f_arima(dados, h)
+
+plot(arima_prev95, main = "Previsão 95% de probabilidade de cobertura")
+
+linhas <- c("Sep 1992","Oct 1992","Nov 1992","Dec 1992","Jan 1993","Feb 1993","Mar 1993","Apr 1993","May 1993","Jun 1993","Jul 1993","Aug 1993","Sep 1993","Oct 1993","Nov 1993","Dec 1993","Jan 1994","Feb 1994")
+
+
+arima_prev95 %>% 
+  as_tibble() %>%
+  mutate(t = linhas)%>%
+  select(t, everything()) %>%
+  knitr::kable(
+      format = "latex",
+      align = c("c"),
+      booktabs = TRUE,
+      longtable = TRUE,
+      linesep = "",
+      escape = FALSE,
+      digits = 2,
+      col.names = c("Período (mês/ano)", "Prev. Pontual", "LI", "LS", "LI", "LS")) %>%
+    add_header_above(c(" " = 2, "IC para 80%" = 2, "IC para 95%" = 2))
+
+
+# ARIMA com transformação
+arima_transf_prev95 <- f_arima_transf(dados, h)
+
+plot(arima_transf_prev95, main = "Previsão 95% de probabilidade de cobertura")
+
+arima_transf_prev95 %>% 
+  as_tibble() %>%
+  mutate(t = linhas)%>%
+  select(t, everything()) %>%
+  knitr::kable(
+      format = "latex",
+      align = c("c"),
+      booktabs = TRUE,
+      longtable = TRUE,
+      linesep = "",
+      escape = FALSE,
+      digits = 2,
+      col.names = c("Período (mês/ano)", "Prev. Pontual", "LI", "LS", "LI", "LS")) %>%
+    add_header_above(c(" " = 2, "IC para 80%" = 2, "IC para 95%" = 2))
+
+
+# ETS
+ets_prev95 <- f_ets(dados, h)
+
+plot(ets_prev95, main = "Previsão 95% de probabilidade de cobertura")
+
+ets_prev95 %>% 
+  as_tibble() %>%
+  mutate(t = linhas)%>%
+  select(t, everything()) %>%
+  knitr::kable(
+      format = "latex",
+      align = c("c"),
+      booktabs = TRUE,
+      longtable = TRUE,
+      linesep = "",
+      escape = FALSE,
+      digits = 2,
+      col.names = c("Período (mês/ano)", "Prev. Pontual", "LI", "LS", "LI", "LS")) %>%
+    add_header_above(c(" " = 2, "IC para 80%" = 2, "IC para 95%" = 2))
+
+
+# ETS com transformação
+ets_transf_prev95 <- f_ets_transf(dados, h)
+
+plot(ets_transf_prev95, main = "Previsão 95% de probabilidade de cobertura")
+
+ets_transf_prev95 %>% 
+  as_tibble() %>%
+  mutate(t = linhas)%>%
+  select(t, everything()) %>%
+  knitr::kable(
+      format = "latex",
+      align = c("c"),
+      booktabs = TRUE,
+      longtable = TRUE,
+      linesep = "",
+      escape = FALSE,
+      digits = 2,
+      col.names = c("Período (mês/ano)", "Prev. Pontual", "LI", "LS", "LI", "LS")) %>%
+    add_header_above(c(" " = 2, "IC para 80%" = 2, "IC para 95%" = 2))
 
 ```
 

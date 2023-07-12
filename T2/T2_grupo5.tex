@@ -52,6 +52,46 @@
   \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
 \fi
 
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
 
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
@@ -177,7 +217,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[boxrule=0pt, interior hidden, breakable, borderline west={3pt}{0pt}{shadecolor}, sharp corners, enhanced, frame hidden]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[breakable, interior hidden, borderline west={3pt}{0pt}{shadecolor}, enhanced, boxrule=0pt, frame hidden, sharp corners]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -705,8 +745,9 @@ Feb 1994 & 5256.72 & 4407.77 & 6105.66 & 3958.37 & 6555.07\\
 
 \newpage{}
 
-\hypertarget{arima-com-tranformauxe7uxe3o}{%
-\subsection{ARIMA com tranformação}\label{arima-com-tranformauxe7uxe3o}}
+\hypertarget{arima-com-transformauxe7uxe3o}{%
+\subsection{ARIMA com
+transformação}\label{arima-com-transformauxe7uxe3o}}
 
 \begin{figure}
 
@@ -838,6 +879,606 @@ objetivo;
 
 Todo o projeto de composição deste documento pode ser encontrado aqui:
 \url{https://github.com/cesar-galvao/trabalhos_series_temporais}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{if}\NormalTok{(}\SpecialCharTok{!}\NormalTok{(}\StringTok{"pacman"} \SpecialCharTok{\%in\%} \FunctionTok{installed.packages}\NormalTok{()))\{}\FunctionTok{install.packages}\NormalTok{(}\StringTok{"pacman"}\NormalTok{)\}}
+
+\NormalTok{pacman}\SpecialCharTok{::}\FunctionTok{p\_load}\NormalTok{(Mcomp, tidyverse, forecast, fpp2, xts, tseries, tidymodels, kableExtra)}
+
+
+
+\FunctionTok{data}\NormalTok{(M3) }\CommentTok{\#carrega os dados}
+\NormalTok{id }\OtherTok{\textless{}{-}} \DecValTok{2183} \CommentTok{\#série temporal escolhida}
+
+\NormalTok{serie }\OtherTok{\textless{}{-}}\NormalTok{ M3[[id]]}
+
+\NormalTok{dados }\OtherTok{\textless{}{-}}\NormalTok{ serie}\SpecialCharTok{$}\NormalTok{x}
+
+\FunctionTok{plot}\NormalTok{(serie, }\AttributeTok{main =} \StringTok{"Série Temporal M3{-}2183"}\NormalTok{)}
+
+
+
+\NormalTok{serie\_ms }\OtherTok{\textless{}{-}}\NormalTok{ forecast}\SpecialCharTok{::}\FunctionTok{msts}\NormalTok{(dados, }\AttributeTok{seasonal.periods =} \FunctionTok{c}\NormalTok{(}\DecValTok{12}\NormalTok{))}
+
+\CommentTok{\# media dos resíduos é em torno de 5. Considerando a magnitude dos dados que temos usando summary(dados), está próximo de zero o suficiente}
+
+\CommentTok{\#tentei períodos secundários, porém o melhor ajuste é com apenas um ciclo anual. Só é possível dois ciclos secundários completos para análise até quadrienal, mas até aí todos apresentam resíduos inadequados. }
+
+\NormalTok{decomp\_mstl }\OtherTok{\textless{}{-}} \FunctionTok{mstl}\NormalTok{(serie\_ms, }\AttributeTok{lambda =} \ConstantTok{NULL}\NormalTok{, }\AttributeTok{t.window =} \DecValTok{9}\NormalTok{)}
+
+\CommentTok{\#ajustar com lambda = "auto" até agora não parece fazer qualquer diferença}
+
+
+
+\NormalTok{decomp\_mstl }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{autoplot}\NormalTok{(}\AttributeTok{main =} \StringTok{"Decomposição MSTL com período anual simples"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Ano"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_bw}\NormalTok{()}
+
+
+\CommentTok{\# diferenciacoes comuns}
+\CommentTok{\# ndiffs(serie\_ms)}
+
+\CommentTok{\#diferenciacoes sazonais}
+\CommentTok{\# serie\_ms \%\textgreater{}\% diff() \%\textgreater{}\% nsdiffs()}
+
+\NormalTok{serie\_ms\_diff }\OtherTok{\textless{}{-}}\NormalTok{ serie\_ms }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{diff}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{diff}\NormalTok{(}\AttributeTok{lag =} \DecValTok{12}\NormalTok{)}
+
+\CommentTok{\# Inicializacao dos resíduos}
+\NormalTok{fit }\OtherTok{\textless{}{-}} \FunctionTok{Arima}\NormalTok{(dados, }\AttributeTok{order=}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), }\AttributeTok{seasonal=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{)) }\CommentTok{\#modelo selecionado em outro estágio da análise}
+\NormalTok{E }\OtherTok{\textless{}{-}} \FunctionTok{window}\NormalTok{(fit}\SpecialCharTok{$}\NormalTok{residuals, }\AttributeTok{start=}\FunctionTok{c}\NormalTok{(}\DecValTok{1984}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+
+\FunctionTok{kpss.test}\NormalTok{(E) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{tidy}\NormalTok{()}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(method, statistic, }\StringTok{\textasciigrave{}}\AttributeTok{p.value}\StringTok{\textasciigrave{}}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+    \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+    \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"lccc"}\NormalTok{),}
+    \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{longtable =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{linesep =} \StringTok{""}\NormalTok{,}
+    \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{digits =} \DecValTok{2}\NormalTok{,}
+    \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{""}\NormalTok{, }\StringTok{"Estatística"}\NormalTok{, }\StringTok{"p{-}valor"}\NormalTok{)}
+\NormalTok{    ) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{kable\_styling}\NormalTok{(}
+      \AttributeTok{position =} \StringTok{"center"}\NormalTok{,}
+      \AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"repeat\_header"}\NormalTok{),}
+      \AttributeTok{stripe\_color =} \StringTok{"gray!15"}\NormalTok{)}
+
+
+\CommentTok{\# Graficos de Autocorrelacao}
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(serie\_ms\_diff, }\AttributeTok{main=}\StringTok{"Série com diferenças"}\NormalTok{,}\AttributeTok{ylab=}\StringTok{""}\NormalTok{)}
+\FunctionTok{acf}\NormalTok{(serie\_ms\_diff, }\AttributeTok{lag=}\DecValTok{12}\SpecialCharTok{*}\DecValTok{6}\NormalTok{, }\AttributeTok{main=}\StringTok{"ACF"}\NormalTok{)}
+\FunctionTok{pacf}\NormalTok{(serie\_ms\_diff, }\AttributeTok{lag=}\DecValTok{12}\SpecialCharTok{*}\DecValTok{6}\NormalTok{, }\AttributeTok{main=}\StringTok{"PACF"}\NormalTok{)}
+
+\NormalTok{melhor\_AICc }\OtherTok{\textless{}{-}} \ConstantTok{Inf}
+\ControlFlowTok{for}\NormalTok{(p }\ControlFlowTok{in} \DecValTok{0}\SpecialCharTok{:}\DecValTok{2}\NormalTok{)\{}
+  \ControlFlowTok{for}\NormalTok{(q }\ControlFlowTok{in} \DecValTok{0}\SpecialCharTok{:}\DecValTok{2}\NormalTok{)\{}
+    \ControlFlowTok{for}\NormalTok{(P }\ControlFlowTok{in} \DecValTok{0}\SpecialCharTok{:}\DecValTok{2}\NormalTok{)\{}
+      \ControlFlowTok{for}\NormalTok{(Q }\ControlFlowTok{in} \DecValTok{0}\SpecialCharTok{:}\DecValTok{2}\NormalTok{)\{}
+        
+        \CommentTok{\#cat("p =",p,", q =",q,", P =",P,", Q =",Q,"\textbackslash{}n")}
+        
+        \FunctionTok{tryCatch}\NormalTok{(\{fit }\OtherTok{\textless{}{-}} \FunctionTok{Arima}\NormalTok{(serie\_ms, }\AttributeTok{order=}\FunctionTok{c}\NormalTok{(p,}\DecValTok{1}\NormalTok{,q), }\AttributeTok{seasonal=}\FunctionTok{c}\NormalTok{(P,}\DecValTok{1}\NormalTok{,Q))\}, }\AttributeTok{error=}\ControlFlowTok{function}\NormalTok{(e)\{}\FunctionTok{cat}\NormalTok{(}\StringTok{""}\NormalTok{,}\FunctionTok{conditionMessage}\NormalTok{(e), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)\})}
+        
+        \ControlFlowTok{if}\NormalTok{(fit}\SpecialCharTok{$}\NormalTok{aicc }\SpecialCharTok{\textless{}=}\NormalTok{ melhor\_AICc)\{}
+\NormalTok{          melhor\_AICc }\OtherTok{\textless{}{-}}\NormalTok{ fit}\SpecialCharTok{$}\NormalTok{aicc}
+          \CommentTok{\#cat("p =",p,", q =",q,", P =",P,", Q =",Q,", AICc =",fit$aicc,"\textbackslash{}n")}
+\NormalTok{          \}}
+        
+\NormalTok{      \}}
+\NormalTok{    \}}
+\NormalTok{  \}}
+\NormalTok{\}}
+
+\CommentTok{\#melhor\_AICc}
+
+\CommentTok{\# teste com auto.arima para verificar}
+\CommentTok{\#auto.arima(serie\_ms)}
+
+
+\CommentTok{\# Analise de residuos}
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(E, }\AttributeTok{main=}\StringTok{"Resíduos"}\NormalTok{,}\AttributeTok{ylab=}\StringTok{""}\NormalTok{)}
+\FunctionTok{qqnorm}\NormalTok{(E)}
+\FunctionTok{qqline}\NormalTok{(E)}
+\FunctionTok{acf}\NormalTok{(E,}\AttributeTok{lag.max=}\DecValTok{12}\SpecialCharTok{*}\DecValTok{6}\NormalTok{,}\AttributeTok{main=}\StringTok{"ACF"}\NormalTok{)}
+
+
+\CommentTok{\#Testes}
+\NormalTok{box }\OtherTok{\textless{}{-}} \FunctionTok{Box.test}\NormalTok{(E,}\AttributeTok{lag=}\DecValTok{15}\NormalTok{,}\AttributeTok{type=}\StringTok{"Ljung{-}Box"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tidy}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(method, }\FunctionTok{everything}\NormalTok{()) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{parameter =} \FunctionTok{as.character}\NormalTok{(parameter)) }\CommentTok{\#independencia}
+\NormalTok{shap }\OtherTok{\textless{}{-}} \FunctionTok{shapiro.test}\NormalTok{(E) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tidy}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{parameter =} \StringTok{""}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(method, }\FunctionTok{everything}\NormalTok{())  }\CommentTok{\#normalidade}
+
+\FunctionTok{bind\_rows}\NormalTok{(box, shap) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+    \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+    \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"lccc"}\NormalTok{),}
+    \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{longtable =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{linesep =} \StringTok{""}\NormalTok{,}
+    \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{digits =} \DecValTok{2}\NormalTok{,}
+    \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{""}\NormalTok{, }\StringTok{"Estatística"}\NormalTok{, }\StringTok{"p{-}valor"}\NormalTok{, }\StringTok{"Lag"}\NormalTok{)}
+\NormalTok{    ) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{kable\_styling}\NormalTok{(}
+      \AttributeTok{position =} \StringTok{"center"}\NormalTok{,}
+      \AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"repeat\_header"}\NormalTok{),}
+      \AttributeTok{stripe\_color =} \StringTok{"gray!15"}\NormalTok{)}
+
+\FunctionTok{rm}\NormalTok{(box, shap)}
+
+
+\CommentTok{\# Transformacao de Box{-}Cox}
+\NormalTok{autolambda }\OtherTok{\textless{}{-}} \FunctionTok{BoxCox.lambda}\NormalTok{(dados)}
+\NormalTok{dadosbc }\OtherTok{\textless{}{-}} \FunctionTok{BoxCox}\NormalTok{(dados, }\AttributeTok{lambda=}\NormalTok{autolambda)}
+
+
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(dados, }\AttributeTok{main=}\StringTok{\textquotesingle{}Série original\textquotesingle{}}\NormalTok{,}\AttributeTok{ylab=}\StringTok{\textquotesingle{}\textquotesingle{}}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(dadosbc, }\AttributeTok{main=}\StringTok{\textquotesingle{}Série transformada\textquotesingle{}}\NormalTok{,}\AttributeTok{ylab=}\StringTok{\textquotesingle{}\textquotesingle{}}\NormalTok{)}
+
+
+\CommentTok{\# Diferencas (BC)}
+\CommentTok{\# ndiffs(dadosbc)}
+\CommentTok{\# dadosbc \%\textgreater{}\% diff() \%\textgreater{}\% nsdiffs()}
+
+\NormalTok{dadosbcdiff }\OtherTok{\textless{}{-}}\NormalTok{ dadosbc }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{diff}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{diff}\NormalTok{(}\AttributeTok{lag =} \DecValTok{12}\NormalTok{)}
+
+\NormalTok{fit2 }\OtherTok{\textless{}{-}} \FunctionTok{Arima}\NormalTok{(dadosbc, }\AttributeTok{order=}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), }\AttributeTok{seasonal=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))}\CommentTok{\# modelo ajustado em etapa posterior da análise}
+
+\NormalTok{E2 }\OtherTok{\textless{}{-}} \FunctionTok{window}\NormalTok{(fit2}\SpecialCharTok{$}\NormalTok{residuals, }\AttributeTok{start=}\FunctionTok{c}\NormalTok{(}\DecValTok{1984}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+
+\FunctionTok{kpss.test}\NormalTok{(E2) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{tidy}\NormalTok{()}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(method, statistic, }\StringTok{\textasciigrave{}}\AttributeTok{p.value}\StringTok{\textasciigrave{}}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+    \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+    \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"lccc"}\NormalTok{),}
+    \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{longtable =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{linesep =} \StringTok{""}\NormalTok{,}
+    \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{digits =} \DecValTok{2}\NormalTok{,}
+    \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{""}\NormalTok{, }\StringTok{"Estatística"}\NormalTok{, }\StringTok{"p{-}valor"}\NormalTok{)}
+\NormalTok{    ) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{kable\_styling}\NormalTok{(}
+      \AttributeTok{position =} \StringTok{"center"}\NormalTok{,}
+      \AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"repeat\_header"}\NormalTok{),}
+      \AttributeTok{stripe\_color =} \StringTok{"gray!15"}\NormalTok{)}
+
+
+\CommentTok{\# Graficos de Autocorrelacao (BC)}
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(dadosbcdiff, }\AttributeTok{main=}\StringTok{"Série (boxcox) com dif."}\NormalTok{,}\AttributeTok{ylab=}\StringTok{""}\NormalTok{)}
+\FunctionTok{acf}\NormalTok{(dadosbcdiff, }\AttributeTok{lag=}\DecValTok{12}\SpecialCharTok{*}\DecValTok{6}\NormalTok{, }\AttributeTok{main=}\StringTok{"ACF"}\NormalTok{)}
+\FunctionTok{pacf}\NormalTok{(dadosbcdiff, }\AttributeTok{lag=}\DecValTok{12}\SpecialCharTok{*}\DecValTok{6}\NormalTok{, }\AttributeTok{main=}\StringTok{"PACF"}\NormalTok{)}
+
+
+\CommentTok{\# Criterio de Akaike (BC)}
+\NormalTok{melhor\_AICc }\OtherTok{\textless{}{-}} \ConstantTok{Inf}
+\ControlFlowTok{for}\NormalTok{(p }\ControlFlowTok{in} \DecValTok{0}\SpecialCharTok{:}\DecValTok{2}\NormalTok{)\{}
+  \ControlFlowTok{for}\NormalTok{(q }\ControlFlowTok{in} \DecValTok{0}\SpecialCharTok{:}\DecValTok{2}\NormalTok{)\{}
+    \ControlFlowTok{for}\NormalTok{(P }\ControlFlowTok{in} \DecValTok{0}\SpecialCharTok{:}\DecValTok{2}\NormalTok{)\{}
+      \ControlFlowTok{for}\NormalTok{(Q }\ControlFlowTok{in} \DecValTok{0}\SpecialCharTok{:}\DecValTok{2}\NormalTok{)\{}
+        \CommentTok{\#cat("p =",p,", q =",q,", P =",P,", Q =",Q,"\textbackslash{}n")}
+        \FunctionTok{tryCatch}\NormalTok{(\{fit }\OtherTok{\textless{}{-}} \FunctionTok{Arima}\NormalTok{(dadosbc, }\AttributeTok{order=}\FunctionTok{c}\NormalTok{(p,}\DecValTok{1}\NormalTok{,q), }\AttributeTok{seasonal=}\FunctionTok{c}\NormalTok{(P,}\DecValTok{1}\NormalTok{,Q))\}, }\AttributeTok{error=}\ControlFlowTok{function}\NormalTok{(e)\{}\FunctionTok{cat}\NormalTok{(}\StringTok{"ERROR :"}\NormalTok{,}\FunctionTok{conditionMessage}\NormalTok{(e), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)\})}
+        \ControlFlowTok{if}\NormalTok{(fit}\SpecialCharTok{$}\NormalTok{aicc }\SpecialCharTok{\textless{}=}\NormalTok{ melhor\_AICc)\{}
+\NormalTok{          melhor\_AICc }\OtherTok{\textless{}{-}}\NormalTok{ fit}\SpecialCharTok{$}\NormalTok{aicc}
+          \CommentTok{\#cat("p =",p,", q =",q,", P =",P,", Q =",Q,", AICc =",fit$aicc,"\textbackslash{}n")\}}
+        
+\NormalTok{      \}}
+\NormalTok{    \}}
+\NormalTok{  \}}
+\NormalTok{  \}}
+\NormalTok{\}}
+\CommentTok{\# melhor\_AICc}
+
+\CommentTok{\# auto.arima(serie\_ms)}
+
+
+\CommentTok{\# Inicializacao}
+\CommentTok{\# Analise de residuos}
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(E2, }\AttributeTok{main=}\StringTok{"Resíduos (boxcox)"}\NormalTok{,}\AttributeTok{ylab=}\StringTok{""}\NormalTok{)}
+\FunctionTok{qqnorm}\NormalTok{(E2)}
+\FunctionTok{qqline}\NormalTok{(E2)}
+\FunctionTok{acf}\NormalTok{(E,}\AttributeTok{lag.max=}\DecValTok{12}\SpecialCharTok{*}\DecValTok{6}\NormalTok{,}\AttributeTok{main=}\StringTok{"ACF"}\NormalTok{)}
+
+
+\CommentTok{\#Testes}
+\NormalTok{box }\OtherTok{\textless{}{-}} \FunctionTok{Box.test}\NormalTok{(E2,}\AttributeTok{lag=}\DecValTok{15}\NormalTok{,}\AttributeTok{type=}\StringTok{"Ljung{-}Box"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tidy}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(method, }\FunctionTok{everything}\NormalTok{()) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{parameter =} \FunctionTok{as.character}\NormalTok{(parameter)) }\CommentTok{\#independencia}
+\NormalTok{shap }\OtherTok{\textless{}{-}} \FunctionTok{shapiro.test}\NormalTok{(E2) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tidy}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{parameter =} \StringTok{""}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(method, }\FunctionTok{everything}\NormalTok{())  }\CommentTok{\#normalidade}
+
+\FunctionTok{bind\_rows}\NormalTok{(box, shap) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+    \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+    \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"lccc"}\NormalTok{),}
+    \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{longtable =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{linesep =} \StringTok{""}\NormalTok{,}
+    \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{digits =} \DecValTok{2}\NormalTok{,}
+    \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{""}\NormalTok{, }\StringTok{"Estatística"}\NormalTok{, }\StringTok{"p{-}valor"}\NormalTok{, }\StringTok{"Lag"}\NormalTok{)}
+\NormalTok{    ) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{kable\_styling}\NormalTok{(}
+      \AttributeTok{position =} \StringTok{"center"}\NormalTok{,}
+      \AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"repeat\_header"}\NormalTok{),}
+      \AttributeTok{stripe\_color =} \StringTok{"gray!15"}\NormalTok{)}
+
+\FunctionTok{rm}\NormalTok{(box, shap)}
+
+
+\CommentTok{\# monta as combinações possíveis de modelo ets}
+\NormalTok{model }\OtherTok{\textless{}{-}} \FunctionTok{expand\_grid}\NormalTok{(}\AttributeTok{v1 =} \FunctionTok{c}\NormalTok{(}\StringTok{"A"}\NormalTok{, }\StringTok{"M"}\NormalTok{, }\StringTok{"N"}\NormalTok{), }\AttributeTok{v2 =} \FunctionTok{c}\NormalTok{(}\StringTok{"A"}\NormalTok{, }\StringTok{"M"}\NormalTok{, }\StringTok{"N"}\NormalTok{), }\AttributeTok{v3 =} \FunctionTok{c}\NormalTok{(}\StringTok{"A"}\NormalTok{, }\StringTok{"M"}\NormalTok{, }\StringTok{"N"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{modelo =} \FunctionTok{str\_c}\NormalTok{(v1,v2,v3)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(modelo) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{unique}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{expand\_grid}\NormalTok{(., }\AttributeTok{damp =} \FunctionTok{c}\NormalTok{(}\ConstantTok{TRUE}\NormalTok{, }\ConstantTok{FALSE}\NormalTok{))}
+\CommentTok{\# N, A, M, + damped}
+
+
+\CommentTok{\#funcao pra montar indicadores do modelo}
+\NormalTok{criterios }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(modelo, damp, dados) \{ }
+\NormalTok{  ETS }\OtherTok{\textless{}{-}} \FunctionTok{ets}\NormalTok{(dados, }\AttributeTok{model =}\NormalTok{ modelo, }\AttributeTok{damped =}\NormalTok{ damp)}
+  \CommentTok{\#usamos o objeto dados como um padrao}
+  
+\NormalTok{  tabela }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}
+    \AttributeTok{nome =}\NormalTok{ modelo,}
+    \AttributeTok{sigla =} \FunctionTok{str\_c}\NormalTok{(}\StringTok{"ETS("}\NormalTok{, }\FunctionTok{str\_c}\NormalTok{(}\FunctionTok{substr}\NormalTok{(modelo,}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{),  }\FunctionTok{substr}\NormalTok{(modelo,}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{), }\FunctionTok{substr}\NormalTok{(modelo,}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{), }\AttributeTok{sep =} \StringTok{","}\NormalTok{), }\StringTok{")"}\NormalTok{),}
+    \AttributeTok{damped =}\NormalTok{ damp,}
+    \AttributeTok{AIC =}\NormalTok{ ETS}\SpecialCharTok{$}\NormalTok{aic, }
+    \AttributeTok{AICc =}\NormalTok{ ETS}\SpecialCharTok{$}\NormalTok{aicc, }
+    \AttributeTok{BIC =}\NormalTok{ ETS}\SpecialCharTok{$}\NormalTok{bic)}
+  
+  \FunctionTok{return}\NormalTok{(tabela)}
+\NormalTok{\}}
+
+
+\CommentTok{\#selecionando modelos permitidos pela funcao ets}
+\CommentTok{\# for(i in 1:length(model$modelo))\{}
+\CommentTok{\#   print(i)}
+\CommentTok{\#   print(try(\{ets(dados, model = model$modelo[i], damped = model$damp[i])\}, silent = TRUE))}
+\CommentTok{\# \}}
+
+\NormalTok{selecionados }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{6}\NormalTok{, }\DecValTok{14}\NormalTok{, }\DecValTok{18}\SpecialCharTok{:}\DecValTok{24}\NormalTok{, }\DecValTok{27}\SpecialCharTok{:}\DecValTok{30}\NormalTok{, }\DecValTok{32}\NormalTok{, }\DecValTok{34}\NormalTok{, }\DecValTok{36}\NormalTok{)}
+
+\NormalTok{model\_select }\OtherTok{\textless{}{-}}\NormalTok{ model[selecionados,]}
+
+\NormalTok{tabela\_modelos\_ETS }\OtherTok{\textless{}{-}} \FunctionTok{map2\_df}\NormalTok{(model\_select}\SpecialCharTok{$}\NormalTok{modelo, model\_select}\SpecialCharTok{$}\NormalTok{damp, criterios, dados) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(AIC) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{modelo =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{    damped }\SpecialCharTok{==} \ConstantTok{TRUE} \SpecialCharTok{\textasciitilde{}} \FunctionTok{str\_replace}\NormalTok{(sigla, }\StringTok{",A"}\NormalTok{, }\StringTok{",Ad"}\NormalTok{),}
+    \AttributeTok{.default =}\NormalTok{ sigla}
+\NormalTok{  ))}
+
+\NormalTok{tabela\_modelos\_ETS }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\StringTok{"Modelo"}\OtherTok{=}\NormalTok{ modelo, AIC}\SpecialCharTok{:}\NormalTok{BIC)}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{head}\NormalTok{(}\DecValTok{6}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+    \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+    \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"lccc"}\NormalTok{),}
+    \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{longtable =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{linesep =} \StringTok{""}\NormalTok{,}
+    \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{digits =} \DecValTok{2}
+\NormalTok{    ) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{kable\_styling}\NormalTok{(}
+      \AttributeTok{position =} \StringTok{"center"}\NormalTok{,}
+      \AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"repeat\_header"}\NormalTok{),}
+      \AttributeTok{stripe\_color =} \StringTok{"gray!15"}\NormalTok{)}
+
+
+
+\CommentTok{\# decomposicao ETS sem transformacao {-}{-}{-}{-}}
+\NormalTok{fit\_ets }\OtherTok{\textless{}{-}} \FunctionTok{ets}\NormalTok{(dados, }\AttributeTok{model =} \StringTok{"AAA"}\NormalTok{, }\AttributeTok{damped =} \ConstantTok{TRUE}\NormalTok{)}
+
+\FunctionTok{plot}\NormalTok{(fit\_ets)}
+
+
+\CommentTok{\# Análise de resíduos ETS sem transformação}
+\NormalTok{E3 }\OtherTok{\textless{}{-}}\NormalTok{ fit\_ets}\SpecialCharTok{$}\NormalTok{residuals}
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(E3, }\AttributeTok{main =} \StringTok{"Resíduos"}\NormalTok{)}
+\FunctionTok{acf}\NormalTok{(E3)}
+\FunctionTok{pacf}\NormalTok{(E3)}
+\FunctionTok{qqnorm}\NormalTok{(E3)}
+\FunctionTok{qqline}\NormalTok{(E3)}
+
+
+\CommentTok{\# \# Testes para ETS sem transformação}
+\NormalTok{box }\OtherTok{\textless{}{-}} \FunctionTok{Box.test}\NormalTok{(E3,}\AttributeTok{lag=}\DecValTok{15}\NormalTok{,}\AttributeTok{type=}\StringTok{"Ljung{-}Box"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tidy}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(method, }\FunctionTok{everything}\NormalTok{()) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{parameter =} \FunctionTok{as.character}\NormalTok{(parameter)) }\CommentTok{\#independencia}
+\NormalTok{shap }\OtherTok{\textless{}{-}} \FunctionTok{shapiro.test}\NormalTok{(E3) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tidy}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{parameter =} \StringTok{""}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(method, }\FunctionTok{everything}\NormalTok{())  }\CommentTok{\#normalidade}
+\NormalTok{kpss }\OtherTok{\textless{}{-}} \FunctionTok{kpss.test}\NormalTok{(E3) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tidy}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(method, }\FunctionTok{everything}\NormalTok{()) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{parameter =} \FunctionTok{as.character}\NormalTok{(parameter))}
+
+\FunctionTok{bind\_rows}\NormalTok{(kpss,box, shap) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+    \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+    \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"lccc"}\NormalTok{),}
+    \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{longtable =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{linesep =} \StringTok{""}\NormalTok{,}
+    \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{digits =} \DecValTok{2}\NormalTok{,}
+    \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{""}\NormalTok{, }\StringTok{"Estatística"}\NormalTok{, }\StringTok{"p{-}valor"}\NormalTok{, }\StringTok{"Lag"}\NormalTok{)}
+\NormalTok{    ) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{kable\_styling}\NormalTok{(}
+      \AttributeTok{position =} \StringTok{"center"}\NormalTok{,}
+      \AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"repeat\_header"}\NormalTok{),}
+      \AttributeTok{stripe\_color =} \StringTok{"gray!15"}\NormalTok{)}
+
+\FunctionTok{rm}\NormalTok{(box, shap, kpss)}
+
+
+\CommentTok{\# avalia valor de lambda da transformacao boxcox}
+\NormalTok{lambda }\OtherTok{\textless{}{-}}\NormalTok{ dados }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{BoxCox.lambda}\NormalTok{()}
+
+\NormalTok{dados\_box }\OtherTok{\textless{}{-}}\NormalTok{ dados }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{BoxCox}\NormalTok{(lambda)}
+
+
+\CommentTok{\# visualização e decomp da ETS com transformação}
+\FunctionTok{plot}\NormalTok{(dados\_box,}\AttributeTok{main=} \FunctionTok{parse}\NormalTok{(}\AttributeTok{text =} \FunctionTok{paste0}\NormalTok{(}\StringTok{\textquotesingle{}"Série com transformação Box{-}Cox  "\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}\textasciitilde{} lambda == \textquotesingle{}}\NormalTok{, }\FunctionTok{round}\NormalTok{(lambda, }\DecValTok{3}\NormalTok{))))}
+
+
+\CommentTok{\# for(i in 1:length(model$modelo))\{}
+\CommentTok{\#   print(i)}
+\CommentTok{\#   print(try(\{ets(dados\_box, model = model$modelo[i], damped = model$damp[i])\}, silent = TRUE))}
+\CommentTok{\# \}}
+
+\CommentTok{\# selecionados\_transf \textless{}{-} c(1, 2, 5, 6, 14, 18, 19:24, 27:30, 32, 34, 36)}
+
+\NormalTok{model\_select\_transf }\OtherTok{\textless{}{-}}\NormalTok{ model[selecionados,]}
+
+\NormalTok{tabela\_modelos\_ETS\_transf }\OtherTok{\textless{}{-}} \FunctionTok{map2\_df}\NormalTok{(model\_select\_transf}\SpecialCharTok{$}\NormalTok{modelo, model\_select\_transf}\SpecialCharTok{$}\NormalTok{damp, criterios, dados\_box) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(AIC) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{modelo =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{    damped }\SpecialCharTok{==} \ConstantTok{TRUE} \SpecialCharTok{\textasciitilde{}} \FunctionTok{str\_replace}\NormalTok{(sigla, }\StringTok{",A"}\NormalTok{, }\StringTok{",Ad"}\NormalTok{),}
+    \AttributeTok{.default =}\NormalTok{ sigla}
+\NormalTok{  ))}
+
+\NormalTok{tabela\_modelos\_ETS\_transf }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\StringTok{"Modelo transformado"}\OtherTok{=}\NormalTok{ modelo, AIC}\SpecialCharTok{:}\NormalTok{BIC)}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{head}\NormalTok{(}\DecValTok{6}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+    \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+    \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"lccc"}\NormalTok{),}
+    \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{longtable =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{linesep =} \StringTok{""}\NormalTok{,}
+    \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{digits =} \DecValTok{2}
+\NormalTok{    ) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{kable\_styling}\NormalTok{(}
+      \AttributeTok{position =} \StringTok{"center"}\NormalTok{,}
+      \AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"repeat\_header"}\NormalTok{),}
+      \AttributeTok{stripe\_color =} \StringTok{"gray!15"}\NormalTok{)}
+
+
+\NormalTok{fit\_ets\_box }\OtherTok{\textless{}{-}} \FunctionTok{ets}\NormalTok{(dados\_box, }\AttributeTok{model =} \StringTok{"AAA"}\NormalTok{, }\AttributeTok{damped =} \ConstantTok{TRUE}\NormalTok{)}
+
+\FunctionTok{plot}\NormalTok{(fit\_ets\_box)}
+
+
+\NormalTok{E4 }\OtherTok{\textless{}{-}}\NormalTok{ fit\_ets\_box}\SpecialCharTok{$}\NormalTok{residuals}
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(E4, }\AttributeTok{main =} \StringTok{"Resíduos"}\NormalTok{)}
+\FunctionTok{acf}\NormalTok{(E4)}
+\FunctionTok{pacf}\NormalTok{(E4)}
+\FunctionTok{qqnorm}\NormalTok{(E4)}
+\FunctionTok{qqline}\NormalTok{(E4)}
+
+
+\CommentTok{\# \# Testes para ETS com transformação}
+\NormalTok{box }\OtherTok{\textless{}{-}} \FunctionTok{Box.test}\NormalTok{(E4,}\AttributeTok{lag=}\DecValTok{15}\NormalTok{,}\AttributeTok{type=}\StringTok{"Ljung{-}Box"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tidy}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(method, }\FunctionTok{everything}\NormalTok{()) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{parameter =} \FunctionTok{as.character}\NormalTok{(parameter)) }\CommentTok{\#independencia}
+\NormalTok{shap }\OtherTok{\textless{}{-}} \FunctionTok{shapiro.test}\NormalTok{(E4) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tidy}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{parameter =} \StringTok{""}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(method, }\FunctionTok{everything}\NormalTok{())  }\CommentTok{\#normalidade}
+\NormalTok{kpss }\OtherTok{\textless{}{-}} \FunctionTok{kpss.test}\NormalTok{(E4) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{tidy}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(method, }\FunctionTok{everything}\NormalTok{()) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\AttributeTok{parameter =} \FunctionTok{as.character}\NormalTok{(parameter))}
+
+\FunctionTok{bind\_rows}\NormalTok{(kpss,box, shap) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+    \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+    \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"lccc"}\NormalTok{),}
+    \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{longtable =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{linesep =} \StringTok{""}\NormalTok{,}
+    \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{digits =} \DecValTok{2}\NormalTok{,}
+    \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{""}\NormalTok{, }\StringTok{"Estatística"}\NormalTok{, }\StringTok{"p{-}valor"}\NormalTok{, }\StringTok{"Lag"}\NormalTok{)}
+\NormalTok{    ) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{kable\_styling}\NormalTok{(}
+      \AttributeTok{position =} \StringTok{"center"}\NormalTok{,}
+      \AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"repeat\_header"}\NormalTok{),}
+      \AttributeTok{stripe\_color =} \StringTok{"gray!15"}\NormalTok{)}
+
+\FunctionTok{rm}\NormalTok{(box, shap, kpss)}
+
+
+\CommentTok{\# Definindo as funções de previsão}
+
+\CommentTok{\# Arima}
+\NormalTok{f\_arima }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, h)\{}
+\NormalTok{fit }\OtherTok{=} \FunctionTok{Arima}\NormalTok{(y, }\AttributeTok{order=}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), }\AttributeTok{seasonal=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\FunctionTok{return}\NormalTok{(}\FunctionTok{forecast}\NormalTok{(fit, h))}
+\NormalTok{\}}
+
+\CommentTok{\# Arima com transformação}
+\NormalTok{f\_arima\_transf }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, h)\{}
+\NormalTok{fit }\OtherTok{=} \FunctionTok{Arima}\NormalTok{(y, }\AttributeTok{order=}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), }\AttributeTok{seasonal=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), }\AttributeTok{lambda =} \FloatTok{0.712}\NormalTok{)}
+\FunctionTok{forecast}\NormalTok{(fit, h)}
+\NormalTok{\}}
+
+\CommentTok{\# ETS}
+\NormalTok{f\_ets }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, h)\{}
+\NormalTok{fit }\OtherTok{=} \FunctionTok{ets}\NormalTok{(y, }\AttributeTok{model=}\StringTok{"AAA"}\NormalTok{, }\AttributeTok{damped =} \ConstantTok{TRUE}\NormalTok{)}
+\FunctionTok{forecast}\NormalTok{(fit, h)}
+\NormalTok{\}}
+
+\CommentTok{\# ETS com transformação}
+\NormalTok{f\_ets\_transf }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(y, h)\{}
+\NormalTok{fit }\OtherTok{=} \FunctionTok{ets}\NormalTok{(y, }\AttributeTok{model=}\StringTok{"AAA"}\NormalTok{, }\AttributeTok{lambda =} \FloatTok{0.712}\NormalTok{, }\AttributeTok{damped =} \ConstantTok{TRUE}\NormalTok{)}
+\FunctionTok{forecast}\NormalTok{(fit, h)}
+\NormalTok{\}}
+
+
+\CommentTok{\# Tamanho da série}
+\NormalTok{n }\OtherTok{\textless{}{-}} \FunctionTok{length}\NormalTok{(dados)}
+
+\CommentTok{\# Cálculo dos erros de previsão para cada método}
+
+\NormalTok{CV\_arima }\OtherTok{\textless{}{-}} \FunctionTok{tsCV}\NormalTok{(}\AttributeTok{y =}\NormalTok{ dados, }\AttributeTok{forecastfunction =}\NormalTok{ f\_arima, }\AttributeTok{h =} \DecValTok{5}\NormalTok{, }\AttributeTok{initial =}\NormalTok{ n}\DecValTok{{-}14}\NormalTok{)}
+
+\NormalTok{CV\_arima\_transf }\OtherTok{\textless{}{-}} \FunctionTok{tsCV}\NormalTok{(}\AttributeTok{y =}\NormalTok{ dados, }\AttributeTok{forecastfunction =}\NormalTok{ f\_arima\_transf,}
+                       \AttributeTok{h =} \DecValTok{5}\NormalTok{, }\AttributeTok{initial =}\NormalTok{ n}\DecValTok{{-}14}\NormalTok{)}
+
+\NormalTok{CV\_ets }\OtherTok{\textless{}{-}} \FunctionTok{tsCV}\NormalTok{(}\AttributeTok{y =}\NormalTok{ dados, }\AttributeTok{forecastfunction =}\NormalTok{ f\_ets, }\AttributeTok{h =} \DecValTok{5}\NormalTok{, }\AttributeTok{initial =}\NormalTok{ n}\DecValTok{{-}14}\NormalTok{)}
+
+\NormalTok{CV\_ets\_transf }\OtherTok{\textless{}{-}} \FunctionTok{tsCV}\NormalTok{(}\AttributeTok{y =}\NormalTok{ dados, }\AttributeTok{forecastfunction =}\NormalTok{ f\_ets\_transf,}
+                     \AttributeTok{h =} \DecValTok{5}\NormalTok{, }\AttributeTok{initial =}\NormalTok{ n}\DecValTok{{-}14}\NormalTok{)}
+
+\CommentTok{\# Cálculo do erro absoluto médio (MAE) para cada horizonte de previsão {-}{-}{-}{-}}
+
+\CommentTok{\#{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-} otimizado abaixo {-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}\#}
+\CommentTok{\# MAE\_arima \textless{}{-} CV\_arima \%\textgreater{}\% abs() \%\textgreater{}\% colMeans(na.rm=T)}
+\CommentTok{\# MAE\_arima\_transf \textless{}{-}  CV\_arima\_transf \%\textgreater{}\% abs() \%\textgreater{}\% colMeans(na.rm=T)}
+\CommentTok{\# MAE\_ets \textless{}{-}  CV\_ets \%\textgreater{}\% abs() \%\textgreater{}\% colMeans(na.rm=T)}
+\CommentTok{\# MAE\_ets\_transf \textless{}{-}  CV\_ets\_transf \%\textgreater{}\% abs() \%\textgreater{}\% colMeans(na.rm=T)}
+\CommentTok{\# }
+\CommentTok{\# tab \textless{}{-} cbind(as.numeric(MAE\_arima), as.numeric(MAE\_ets))}
+\CommentTok{\# tab\_transf \textless{}{-} cbind(MAE\_arima\_transf, MAE\_ets\_transf)}
+\CommentTok{\# }
+\CommentTok{\# tab\_erros \textless{}{-}  tibble(MAE\_arima, MAE\_ets, MAE\_arima\_transf, MAE\_ets\_transf)}
+\CommentTok{\#{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}{-}\#}
+
+\NormalTok{tab\_erros }\OtherTok{\textless{}{-}} \FunctionTok{tibble}\NormalTok{(}
+  \AttributeTok{h =} \FunctionTok{paste0}\NormalTok{(}\StringTok{"h="}\NormalTok{, }\FunctionTok{c}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{)),}
+  \AttributeTok{MAE\_arima =}\NormalTok{ CV\_arima }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+  \AttributeTok{MAE\_arima\_transf =}\NormalTok{  CV\_arima\_transf }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+  \AttributeTok{MAE\_ets =}\NormalTok{  CV\_ets }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+  \AttributeTok{MAE\_ets\_transf =}\NormalTok{  CV\_ets\_transf }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{abs}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{colMeans}\NormalTok{(}\AttributeTok{na.rm=}\NormalTok{T),}
+\NormalTok{)}
+
+
+\NormalTok{tab\_erros }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+    \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+    \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"c"}\NormalTok{),}
+    \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{longtable =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{linesep =} \StringTok{""}\NormalTok{,}
+    \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}ARIMA\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}ETS\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}ARIMA Transformada\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}ETS Transformada\textquotesingle{}}\NormalTok{),}
+    \AttributeTok{digits =} \DecValTok{3}
+\NormalTok{    ) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  kableExtra}\SpecialCharTok{::}\FunctionTok{kable\_styling}\NormalTok{(}
+      \AttributeTok{position =} \StringTok{"center"}\NormalTok{,}
+      \AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"repeat\_header"}\NormalTok{),}
+      \AttributeTok{stripe\_color =} \StringTok{"gray!15"}\NormalTok{)}
+
+
+\NormalTok{tab\_erros }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\AttributeTok{cols =} \SpecialCharTok{{-}}\NormalTok{h, }\AttributeTok{names\_to =} \StringTok{"Modelo"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"values"}\NormalTok{)}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{Modelo =} \FunctionTok{str\_remove\_all}\NormalTok{(Modelo, }\StringTok{"MAE\_"}\NormalTok{),}
+    \AttributeTok{h =} \FunctionTok{str\_remove\_all}\NormalTok{(h, }\StringTok{"h="}\NormalTok{),}
+    \AttributeTok{h =} \FunctionTok{as.integer}\NormalTok{(h)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(h, values, }\AttributeTok{color =}\NormalTok{ Modelo))}\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{y =} \StringTok{"MAE"}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}
+
+
+\CommentTok{\# Verificando o h}
+\NormalTok{h }\OtherTok{\textless{}{-}}\NormalTok{ M3[[id]]}\SpecialCharTok{$}\NormalTok{h}
+
+\CommentTok{\# Gráficos de previsão pontual e intervalar}
+
+\CommentTok{\# ARIMA}
+\NormalTok{arima\_prev95 }\OtherTok{\textless{}{-}} \FunctionTok{f\_arima}\NormalTok{(dados, h)}
+
+\FunctionTok{plot}\NormalTok{(arima\_prev95, }\AttributeTok{main =} \StringTok{"Previsão 95\% de probabilidade de cobertura"}\NormalTok{)}
+
+\NormalTok{linhas }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Sep 1992"}\NormalTok{,}\StringTok{"Oct 1992"}\NormalTok{,}\StringTok{"Nov 1992"}\NormalTok{,}\StringTok{"Dec 1992"}\NormalTok{,}\StringTok{"Jan 1993"}\NormalTok{,}\StringTok{"Feb 1993"}\NormalTok{,}\StringTok{"Mar 1993"}\NormalTok{,}\StringTok{"Apr 1993"}\NormalTok{,}\StringTok{"May 1993"}\NormalTok{,}\StringTok{"Jun 1993"}\NormalTok{,}\StringTok{"Jul 1993"}\NormalTok{,}\StringTok{"Aug 1993"}\NormalTok{,}\StringTok{"Sep 1993"}\NormalTok{,}\StringTok{"Oct 1993"}\NormalTok{,}\StringTok{"Nov 1993"}\NormalTok{,}\StringTok{"Dec 1993"}\NormalTok{,}\StringTok{"Jan 1994"}\NormalTok{,}\StringTok{"Feb 1994"}\NormalTok{)}
+
+
+\NormalTok{arima\_prev95 }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{t =}\NormalTok{ linhas)}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(t, }\FunctionTok{everything}\NormalTok{()) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+      \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+      \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"c"}\NormalTok{),}
+      \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+      \AttributeTok{longtable =} \ConstantTok{TRUE}\NormalTok{,}
+      \AttributeTok{linesep =} \StringTok{""}\NormalTok{,}
+      \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+      \AttributeTok{digits =} \DecValTok{2}\NormalTok{,}
+      \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"Período (mês/ano)"}\NormalTok{, }\StringTok{"Prev. Pontual"}\NormalTok{, }\StringTok{"LI"}\NormalTok{, }\StringTok{"LS"}\NormalTok{, }\StringTok{"LI"}\NormalTok{, }\StringTok{"LS"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{add\_header\_above}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{" "} \OtherTok{=} \DecValTok{2}\NormalTok{, }\StringTok{"IC para 80\%"} \OtherTok{=} \DecValTok{2}\NormalTok{, }\StringTok{"IC para 95\%"} \OtherTok{=} \DecValTok{2}\NormalTok{))}
+
+
+\CommentTok{\# ARIMA com transformação}
+\NormalTok{arima\_transf\_prev95 }\OtherTok{\textless{}{-}} \FunctionTok{f\_arima\_transf}\NormalTok{(dados, h)}
+
+\FunctionTok{plot}\NormalTok{(arima\_transf\_prev95, }\AttributeTok{main =} \StringTok{"Previsão 95\% de probabilidade de cobertura"}\NormalTok{)}
+
+\NormalTok{arima\_transf\_prev95 }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{t =}\NormalTok{ linhas)}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(t, }\FunctionTok{everything}\NormalTok{()) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+      \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+      \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"c"}\NormalTok{),}
+      \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+      \AttributeTok{longtable =} \ConstantTok{TRUE}\NormalTok{,}
+      \AttributeTok{linesep =} \StringTok{""}\NormalTok{,}
+      \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+      \AttributeTok{digits =} \DecValTok{2}\NormalTok{,}
+      \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"Período (mês/ano)"}\NormalTok{, }\StringTok{"Prev. Pontual"}\NormalTok{, }\StringTok{"LI"}\NormalTok{, }\StringTok{"LS"}\NormalTok{, }\StringTok{"LI"}\NormalTok{, }\StringTok{"LS"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{add\_header\_above}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{" "} \OtherTok{=} \DecValTok{2}\NormalTok{, }\StringTok{"IC para 80\%"} \OtherTok{=} \DecValTok{2}\NormalTok{, }\StringTok{"IC para 95\%"} \OtherTok{=} \DecValTok{2}\NormalTok{))}
+
+
+\CommentTok{\# ETS}
+\NormalTok{ets\_prev95 }\OtherTok{\textless{}{-}} \FunctionTok{f\_ets}\NormalTok{(dados, h)}
+
+\FunctionTok{plot}\NormalTok{(ets\_prev95, }\AttributeTok{main =} \StringTok{"Previsão 95\% de probabilidade de cobertura"}\NormalTok{)}
+
+\NormalTok{ets\_prev95 }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{t =}\NormalTok{ linhas)}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(t, }\FunctionTok{everything}\NormalTok{()) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+      \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+      \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"c"}\NormalTok{),}
+      \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+      \AttributeTok{longtable =} \ConstantTok{TRUE}\NormalTok{,}
+      \AttributeTok{linesep =} \StringTok{""}\NormalTok{,}
+      \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+      \AttributeTok{digits =} \DecValTok{2}\NormalTok{,}
+      \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"Período (mês/ano)"}\NormalTok{, }\StringTok{"Prev. Pontual"}\NormalTok{, }\StringTok{"LI"}\NormalTok{, }\StringTok{"LS"}\NormalTok{, }\StringTok{"LI"}\NormalTok{, }\StringTok{"LS"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{add\_header\_above}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{" "} \OtherTok{=} \DecValTok{2}\NormalTok{, }\StringTok{"IC para 80\%"} \OtherTok{=} \DecValTok{2}\NormalTok{, }\StringTok{"IC para 95\%"} \OtherTok{=} \DecValTok{2}\NormalTok{))}
+
+
+\CommentTok{\# ETS com transformação}
+\NormalTok{ets\_transf\_prev95 }\OtherTok{\textless{}{-}} \FunctionTok{f\_ets\_transf}\NormalTok{(dados, h)}
+
+\FunctionTok{plot}\NormalTok{(ets\_transf\_prev95, }\AttributeTok{main =} \StringTok{"Previsão 95\% de probabilidade de cobertura"}\NormalTok{)}
+
+\NormalTok{ets\_transf\_prev95 }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{t =}\NormalTok{ linhas)}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(t, }\FunctionTok{everything}\NormalTok{()) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}
+      \AttributeTok{format =} \StringTok{"latex"}\NormalTok{,}
+      \AttributeTok{align =} \FunctionTok{c}\NormalTok{(}\StringTok{"c"}\NormalTok{),}
+      \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+      \AttributeTok{longtable =} \ConstantTok{TRUE}\NormalTok{,}
+      \AttributeTok{linesep =} \StringTok{""}\NormalTok{,}
+      \AttributeTok{escape =} \ConstantTok{FALSE}\NormalTok{,}
+      \AttributeTok{digits =} \DecValTok{2}\NormalTok{,}
+      \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"Período (mês/ano)"}\NormalTok{, }\StringTok{"Prev. Pontual"}\NormalTok{, }\StringTok{"LI"}\NormalTok{, }\StringTok{"LS"}\NormalTok{, }\StringTok{"LI"}\NormalTok{, }\StringTok{"LS"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{add\_header\_above}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{" "} \OtherTok{=} \DecValTok{2}\NormalTok{, }\StringTok{"IC para 80\%"} \OtherTok{=} \DecValTok{2}\NormalTok{, }\StringTok{"IC para 95\%"} \OtherTok{=} \DecValTok{2}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
 
 
 
