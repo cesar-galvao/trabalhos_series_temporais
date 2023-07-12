@@ -594,7 +594,7 @@ rm(box, shap, kpss)
 
 # Estudo de desempenho preditivo
 
-Para realizar a análise do desempenho preditivo usando uma abordagem de janela deslizante, o estudo considera uma janela de tamanho $n-14$ e calcula os erros de previsão para horizontes de até 5 períodos. Utilizando os modelos previamente mencionados para criar as funções de previsão, Os resultados são apresentados em um gráfico e uma tabela, mostrando os erros absolutos para cada horizonte de previsão.
+Para realizar a análise do desempenho preditivo usando uma abordagem de janela deslizante, o estudo considera uma janela de tamanho $n-14$ e calcula os erros de previsão para horizontes de até 5 períodos. Utilizando os modelos previamente mencionados para criar as funções de previsão, os resultados são apresentados em um gráfico e uma tabela, mostrando os erros absolutos para cada horizonte de previsão.
 
 ## Resultados da Janela Deslizante
 ```{r funcoes-previsao}
@@ -681,7 +681,7 @@ tab_erros %>%
       stripe_color = "gray!15")
 ```
 
-VER PQ A ETS_TRANSF ESTÁ DANDO TUDO NA
+
 
 ## Performance em relação aos horizontes de previsão
 
@@ -703,12 +703,21 @@ tab_erros %>%
 #   legend(x=1,y=0.44, legend=c("ARIMA", "ETS", "ARIMA Transformada", "ETS Transformada"), col=1:4, lwd=2)
 ```
 
-ARRUMAR A LEGENDA E OS VALORES E DEPOIS FAZER A ANÁLISE
+Ao analisar o gráfico obtido, observa-se que o modelo ARIMA, tanto para a série original quanto para a série transformada, apresentou erros médios menores na maioria dos horizontes de previsão, com exceção do horizonte 1. Portanto, o modelo $\text{ARIMA}(2,1,2)\times(2,1,0)_{12}$ obteve melhor comportamento para o caso original e o caso transformado.
 
 
 # Gráficos da previsão pontual e da previsão intervalar dos 4 modelos selecionados
 
-```{r previsao-pontual}
+Utilizou-se o modelo $\text{ARIMA}(2,1,2)\times(2,1,0)_{12}$ para realizar previsões pontuais e intervalares dos modelos selecionados. O horizonte de previsão fornecido pelo banco de dados foi de 18 pontos.
+
+Os gráficos fornecidos permitem visualizar as previsões pontuais e intervalares da série temporal da competição de previsão M3, com uma probabilidade de cobertura de 95%. Já as tabelas, apresentam as previsões para um horizonte de 18 pontos e fornecem os intervalos das probabilidades de cobertura 80% e 95%.
+
+Ao analisar os gráficos e as tabelas nas seções a seguir, observa-se que em todos eles a previsão está aparentemente ajustada à série original e os intervalos de probabilidades de cobertura analisados possuem aproximadamente o mesmo espectro.
+
+{{< pagebreak >}}
+
+## ARIMA
+```{r previsao-pontual-arima, fig.align='center', fig.height=3}
 # Verificando o h
 h <- M3[[id]]$h
 
@@ -718,36 +727,99 @@ h <- M3[[id]]$h
 arima_prev95 <- f_arima(dados, h)
 
 plot(arima_prev95, main = "Previsão 95% de probabilidade de cobertura")
-arima_prev95
 
+linhas <- c("Sep 1992","Oct 1992","Nov 1992","Dec 1992","Jan 1993","Feb 1993","Mar 1993","Apr 1993","May 1993","Jun 1993","Jul 1993","Aug 1993","Sep 1993","Oct 1993","Nov 1993","Dec 1993","Jan 1994","Feb 1994")
+
+
+arima_prev95 %>% 
+  as_tibble() %>%
+  mutate(t = linhas)%>%
+  select(t, everything()) %>%
+  knitr::kable(
+      format = "latex",
+      align = c("c"),
+      booktabs = TRUE,
+      longtable = TRUE,
+      linesep = "",
+      escape = FALSE,
+      digits = 2,
+      col.names = c("Período (mês/ano)", "Prev. Pontual", "LI", "LS", "LI", "LS")) %>%
+    add_header_above(c(" " = 2, "IC para 80%" = 2, "IC para 95%" = 2))
+
+```
+{{< pagebreak >}}
+
+## ARIMA com tranformação
+```{r previsao-pontual-arima-transf, fig.align='center', fig.height=3}
 # ARIMA com transformação
 arima_transf_prev95 <- f_arima_transf(dados, h)
 
 plot(arima_transf_prev95, main = "Previsão 95% de probabilidade de cobertura")
-arima_transf_prev95
 
+arima_transf_prev95 %>% 
+  as_tibble() %>%
+  mutate(t = linhas)%>%
+  select(t, everything()) %>%
+  knitr::kable(
+      format = "latex",
+      align = c("c"),
+      booktabs = TRUE,
+      longtable = TRUE,
+      linesep = "",
+      escape = FALSE,
+      digits = 2,
+      col.names = c("Período (mês/ano)", "Prev. Pontual", "LI", "LS", "LI", "LS")) %>%
+    add_header_above(c(" " = 2, "IC para 80%" = 2, "IC para 95%" = 2))
+```
+{{< pagebreak >}}
+
+## ETS
+```{r previsao-pontual-ets, fig.align='center', fig.height=3}
 # ETS
 ets_prev95 <- f_ets(dados, h)
 
 plot(ets_prev95, main = "Previsão 95% de probabilidade de cobertura")
-ets_prev95
 
+ets_prev95 %>% 
+  as_tibble() %>%
+  mutate(t = linhas)%>%
+  select(t, everything()) %>%
+  knitr::kable(
+      format = "latex",
+      align = c("c"),
+      booktabs = TRUE,
+      longtable = TRUE,
+      linesep = "",
+      escape = FALSE,
+      digits = 2,
+      col.names = c("Período (mês/ano)", "Prev. Pontual", "LI", "LS", "LI", "LS")) %>%
+    add_header_above(c(" " = 2, "IC para 80%" = 2, "IC para 95%" = 2))
+```
+{{< pagebreak >}}
+
+## ETS com transformação
+```{r previsao-pontual-ets-transf, fig.align='center', fig.height=3}
 # ETS com transformação
 ets_transf_prev95 <- f_ets_transf(dados, h)
 
 plot(ets_transf_prev95, main = "Previsão 95% de probabilidade de cobertura")
-ets_transf_prev95
 
+ets_transf_prev95 %>% 
+  as_tibble() %>%
+  mutate(t = linhas)%>%
+  select(t, everything()) %>%
+  knitr::kable(
+      format = "latex",
+      align = c("c"),
+      booktabs = TRUE,
+      longtable = TRUE,
+      linesep = "",
+      escape = FALSE,
+      digits = 2,
+      col.names = c("Período (mês/ano)", "Prev. Pontual", "LI", "LS", "LI", "LS")) %>%
+    add_header_above(c(" " = 2, "IC para 80%" = 2, "IC para 95%" = 2))
 ```
-
-ARRUMAR O ERRO NO ETS_TRANSF 
-
-```{r}
-
-```
-
-COLOCAR INTERPRETAÇÃO
-
+{{< pagebreak >}}
 
 # Resultados
 

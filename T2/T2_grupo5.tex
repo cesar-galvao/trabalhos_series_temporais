@@ -177,7 +177,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[borderline west={3pt}{0pt}{shadecolor}, frame hidden, interior hidden, boxrule=0pt, sharp corners, enhanced, breakable]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[boxrule=0pt, interior hidden, breakable, borderline west={3pt}{0pt}{shadecolor}, sharp corners, enhanced, frame hidden]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -596,7 +596,7 @@ Para realizar a análise do desempenho preditivo usando uma abordagem de
 janela deslizante, o estudo considera uma janela de tamanho \(n-14\) e
 calcula os erros de previsão para horizontes de até 5 períodos.
 Utilizando os modelos previamente mencionados para criar as funções de
-previsão, Os resultados são apresentados em um gráfico e uma tabela,
+previsão, os resultados são apresentados em um gráfico e uma tabela,
 mostrando os erros absolutos para cada horizonte de previsão.
 
 \hypertarget{resultados-da-janela-deslizante}{%
@@ -624,8 +624,6 @@ h=4 & 136.742 & 128.690 & 180.380 & 181.928\\
 \cellcolor{gray!15}{h=5} & \cellcolor{gray!15}{173.517} & \cellcolor{gray!15}{161.675} & \cellcolor{gray!15}{210.707} & \cellcolor{gray!15}{210.361}\\*
 \end{longtable*}
 
-VER PQ A ETS\_TRANSF ESTÁ DANDO TUDO NA
-
 \hypertarget{performance-em-relauxe7uxe3o-aos-horizontes-de-previsuxe3o}{%
 \subsection{Performance em relação aos horizontes de
 previsão}\label{performance-em-relauxe7uxe3o-aos-horizontes-de-previsuxe3o}}
@@ -638,112 +636,194 @@ previsão}\label{performance-em-relauxe7uxe3o-aos-horizontes-de-previsuxe3o}}
 
 \end{figure}
 
-ARRUMAR A LEGENDA E OS VALORES E DEPOIS FAZER A ANÁLISE
+Ao analisar o gráfico obtido, observa-se que o modelo ARIMA, tanto para
+a série original quanto para a série transformada, apresentou erros
+médios menores na maioria dos horizontes de previsão, com exceção do
+horizonte 1. Portanto, o modelo
+\(\text{ARIMA}(2,1,2)\times(2,1,0)_{12}\) obteve melhor comportamento
+para o caso original e o caso transformado.
 
 \hypertarget{gruxe1ficos-da-previsuxe3o-pontual-e-da-previsuxe3o-intervalar-dos-4-modelos-selecionados}{%
 \section{Gráficos da previsão pontual e da previsão intervalar dos 4
 modelos
 selecionados}\label{gruxe1ficos-da-previsuxe3o-pontual-e-da-previsuxe3o-intervalar-dos-4-modelos-selecionados}}
 
-\includegraphics{T2_grupo5_files/figure-pdf/previsao-pontual-1.pdf}
+Utilizou-se o modelo \(\text{ARIMA}(2,1,2)\times(2,1,0)_{12}\) para
+realizar previsões pontuais e intervalares dos modelos selecionados. O
+horizonte de previsão fornecido pelo banco de dados foi de 18 pontos.
 
-\begin{verbatim}
-         Point Forecast    Lo 80    Hi 80    Lo 95    Hi 95
-Sep 1992       4795.360 4568.189 5022.531 4447.932 5142.788
-Oct 1992       5016.382 4763.010 5269.753 4628.883 5403.880
-Nov 1992       4541.278 4248.643 4833.913 4093.731 4988.825
-Dec 1992       4391.441 4032.320 4750.562 3842.213 4940.669
-Jan 1993       4848.159 4440.260 5256.059 4224.331 5471.988
-Feb 1993       4905.299 4467.187 5343.411 4235.264 5575.333
-Mar 1993       5329.729 4861.354 5798.103 4613.411 6046.046
-Apr 1993       5203.385 4700.475 5706.295 4434.251 5972.520
-May 1993       5052.665 4518.132 5587.198 4235.167 5870.163
-Jun 1993       5245.419 4683.930 5806.909 4386.695 6104.144
-Jul 1993       4859.079 4271.730 5446.428 3960.806 5757.352
-Aug 1993       5014.812 4401.327 5628.297 4076.568 5953.057
-Sep 1993       5125.554 4459.124 5791.984 4106.338 6144.771
-Oct 1993       5328.565 4627.990 6029.140 4257.129 6400.001
-Nov 1993       4908.795 4172.038 5645.551 3782.023 6035.566
-Dec 1993       4788.711 4010.224 5567.197 3598.119 5979.303
-Jan 1994       5210.324 4393.633 6027.015 3961.303 6459.345
-Feb 1994       5256.719 4407.774 6105.663 3958.370 6555.067
-\end{verbatim}
+Os gráficos fornecidos permitem visualizar as previsões pontuais e
+intervalares da série temporal da competição de previsão M3, com uma
+probabilidade de cobertura de 95\%. Já as tabelas, apresentam as
+previsões para um horizonte de 18 pontos e fornecem os intervalos das
+probabilidades de cobertura 80\% e 95\%.
 
-\includegraphics{T2_grupo5_files/figure-pdf/previsao-pontual-2.pdf}
+Ao analisar os gráficos e as tabelas nas seções a seguir, observa-se que
+em todos eles a previsão está aparentemente ajustada à série original e
+os intervalos de probabilidades de cobertura analisados possuem
+aproximadamente o mesmo espectro.
 
-\begin{verbatim}
-         Point Forecast    Lo 80    Hi 80    Lo 95    Hi 95
-Sep 1992       4799.752 4565.169 5037.686 4442.368 5164.973
-Oct 1992       5035.236 4767.608 5307.025 4627.652 5452.555
-Nov 1992       4537.145 4237.281 4842.830 4080.957 5006.952
-Dec 1992       4379.433 4016.236 4751.524 3827.684 4951.992
-Jan 1993       4854.191 4428.229 5291.205 4207.361 5526.884
-Feb 1993       4922.088 4462.585 5394.299 4224.665 5649.249
-Mar 1993       5364.435 4861.280 5881.571 4600.788 6160.802
-Apr 1993       5235.766 4699.996 5787.823 4423.227 6086.423
-May 1993       5077.223 4512.969 5660.159 4222.156 5976.018
-Jun 1993       5275.453 4676.146 5895.059 4367.467 6230.952
-Jul 1993       4867.736 4256.482 5501.964 3942.656 5846.601
-Aug 1993       5035.622 4391.144 5704.808 4060.475 6068.613
-Sep 1993       5155.398 4452.819 5886.738 4093.156 6284.981
-Oct 1993       5372.068 4624.761 6150.631 4242.499 6574.823
-Nov 1993       4923.688 4159.707 5723.503 3770.673 6160.632
-Dec 1993       4797.716 3998.702 5637.111 3593.158 6096.874
-Jan 1994       5246.596 4386.318 6149.642 3949.353 6644.026
-Feb 1994       5302.608 4406.473 6244.738 3951.961 6761.014
-\end{verbatim}
+\newpage{}
 
-\includegraphics{T2_grupo5_files/figure-pdf/previsao-pontual-3.pdf}
+\hypertarget{arima}{%
+\subsection{ARIMA}\label{arima}}
 
-\begin{verbatim}
-         Point Forecast    Lo 80    Hi 80    Lo 95    Hi 95
-Sep 1992       4613.023 4391.648 4834.399 4274.459 4951.588
-Oct 1992       4808.078 4557.385 5058.771 4424.676 5191.480
-Nov 1992       4437.827 4153.583 4722.072 4003.113 4872.541
-Dec 1992       4337.828 4016.796 4658.859 3846.853 4828.803
-Jan 1993       4746.470 4386.219 5106.721 4195.513 5297.426
-Feb 1993       4771.433 4370.152 5172.715 4157.726 5385.140
-Mar 1993       5198.160 4754.516 5641.804 4519.665 5876.655
-Apr 1993       5139.633 4652.663 5626.602 4394.877 5884.388
-May 1993       4950.914 4419.944 5481.884 4138.865 5762.962
-Jun 1993       5019.380 4443.961 5594.799 4139.353 5899.408
-Jul 1993       4587.096 3966.960 5207.232 3638.680 5535.512
-Aug 1993       4840.204 4175.228 5505.179 3823.211 5857.196
-Sep 1993       4844.615 4134.766 5554.463 3758.995 5930.234
-Oct 1993       5024.388 4269.787 5778.989 3870.325 6178.451
-Nov 1993       4639.864 3840.678 5439.050 3417.615 5862.114
-Dec 1993       4526.533 3682.995 5370.072 3236.453 5816.614
-Jan 1994       4922.724 4035.118 5810.330 3565.247 6280.201
-Feb 1994       4936.057 4004.711 5867.404 3511.686 6360.429
-\end{verbatim}
+\begin{figure}
 
-\includegraphics{T2_grupo5_files/figure-pdf/previsao-pontual-4.pdf}
+{\centering \includegraphics{T2_grupo5_files/figure-pdf/previsao-pontual-arima-1.pdf}
 
-\begin{verbatim}
-         Point Forecast    Lo 80    Hi 80    Lo 95    Hi 95
-Sep 1992       4631.450 4406.500 4859.593 4288.733 4981.634
-Oct 1992       4819.800 4560.493 5083.189 4424.909 5224.240
-Nov 1992       4426.133 4138.592 4719.160 3988.650 4876.449
-Dec 1992       4311.700 3989.207 4641.298 3821.446 4818.576
-Jan 1993       4732.398 4360.531 5112.881 4167.267 5317.689
-Feb 1993       4780.196 4365.140 5205.907 4149.876 5435.446
-Mar 1993       5219.170 4748.721 5702.169 4504.933 5962.773
-Apr 1993       5164.246 4650.160 5693.522 4384.401 5979.640
-May 1993       4949.949 4397.247 5521.041 4112.426 5830.514
-Jun 1993       5035.976 4434.720 5658.674 4125.515 5996.633
-Jul 1993       4584.535 3955.551 5239.447 3633.645 5596.136
-Aug 1993       4839.699 4154.975 5553.574 3804.956 5942.701
-Sep 1993       4868.346 4137.019 5632.826 3764.092 6050.245
-Oct 1993       5044.941 4259.924 5866.888 3860.229 6316.151
-Nov 1993       4632.659 3823.646 5484.664 3413.999 5952.052
-Dec 1993       4504.345 3658.794 5398.417 3232.316 5890.095
-Jan 1994       4918.287 4005.015 5883.362 3544.099 6413.884
-Feb 1994       4955.395 3995.837 5971.870 3512.727 6531.481
-\end{verbatim}
+}
 
-ARRUMAR O ERRO NO ETS\_TRANSF
+\end{figure}
 
-COLOCAR INTERPRETAÇÃO
+\begin{longtable*}{cccccc}
+\toprule
+\multicolumn{2}{c}{ } & \multicolumn{2}{c}{IC para 80\%} & \multicolumn{2}{c}{IC para 95\%} \\
+\cmidrule(l{3pt}r{3pt}){3-4} \cmidrule(l{3pt}r{3pt}){5-6}
+Período (mês/ano) & Prev. Pontual & LI & LS & LI & LS\\
+\midrule
+Sep 1992 & 4795.36 & 4568.19 & 5022.53 & 4447.93 & 5142.79\\
+Oct 1992 & 5016.38 & 4763.01 & 5269.75 & 4628.88 & 5403.88\\
+Nov 1992 & 4541.28 & 4248.64 & 4833.91 & 4093.73 & 4988.82\\
+Dec 1992 & 4391.44 & 4032.32 & 4750.56 & 3842.21 & 4940.67\\
+Jan 1993 & 4848.16 & 4440.26 & 5256.06 & 4224.33 & 5471.99\\
+Feb 1993 & 4905.30 & 4467.19 & 5343.41 & 4235.26 & 5575.33\\
+Mar 1993 & 5329.73 & 4861.35 & 5798.10 & 4613.41 & 6046.05\\
+Apr 1993 & 5203.39 & 4700.48 & 5706.30 & 4434.25 & 5972.52\\
+May 1993 & 5052.67 & 4518.13 & 5587.20 & 4235.17 & 5870.16\\
+Jun 1993 & 5245.42 & 4683.93 & 5806.91 & 4386.70 & 6104.14\\
+Jul 1993 & 4859.08 & 4271.73 & 5446.43 & 3960.81 & 5757.35\\
+Aug 1993 & 5014.81 & 4401.33 & 5628.30 & 4076.57 & 5953.06\\
+Sep 1993 & 5125.55 & 4459.12 & 5791.98 & 4106.34 & 6144.77\\
+Oct 1993 & 5328.57 & 4627.99 & 6029.14 & 4257.13 & 6400.00\\
+Nov 1993 & 4908.79 & 4172.04 & 5645.55 & 3782.02 & 6035.57\\
+Dec 1993 & 4788.71 & 4010.22 & 5567.20 & 3598.12 & 5979.30\\
+Jan 1994 & 5210.32 & 4393.63 & 6027.01 & 3961.30 & 6459.34\\
+Feb 1994 & 5256.72 & 4407.77 & 6105.66 & 3958.37 & 6555.07\\
+\bottomrule
+\end{longtable*}
+
+\newpage{}
+
+\hypertarget{arima-com-tranformauxe7uxe3o}{%
+\subsection{ARIMA com tranformação}\label{arima-com-tranformauxe7uxe3o}}
+
+\begin{figure}
+
+{\centering \includegraphics{T2_grupo5_files/figure-pdf/previsao-pontual-arima-transf-1.pdf}
+
+}
+
+\end{figure}
+
+\begin{longtable*}{cccccc}
+\toprule
+\multicolumn{2}{c}{ } & \multicolumn{2}{c}{IC para 80\%} & \multicolumn{2}{c}{IC para 95\%} \\
+\cmidrule(l{3pt}r{3pt}){3-4} \cmidrule(l{3pt}r{3pt}){5-6}
+Período (mês/ano) & Prev. Pontual & LI & LS & LI & LS\\
+\midrule
+Sep 1992 & 4799.75 & 4565.17 & 5037.69 & 4442.37 & 5164.97\\
+Oct 1992 & 5035.24 & 4767.61 & 5307.02 & 4627.65 & 5452.55\\
+Nov 1992 & 4537.15 & 4237.28 & 4842.83 & 4080.96 & 5006.95\\
+Dec 1992 & 4379.43 & 4016.24 & 4751.52 & 3827.68 & 4951.99\\
+Jan 1993 & 4854.19 & 4428.23 & 5291.21 & 4207.36 & 5526.88\\
+Feb 1993 & 4922.09 & 4462.59 & 5394.30 & 4224.66 & 5649.25\\
+Mar 1993 & 5364.43 & 4861.28 & 5881.57 & 4600.79 & 6160.80\\
+Apr 1993 & 5235.77 & 4700.00 & 5787.82 & 4423.23 & 6086.42\\
+May 1993 & 5077.22 & 4512.97 & 5660.16 & 4222.16 & 5976.02\\
+Jun 1993 & 5275.45 & 4676.15 & 5895.06 & 4367.47 & 6230.95\\
+Jul 1993 & 4867.74 & 4256.48 & 5501.96 & 3942.66 & 5846.60\\
+Aug 1993 & 5035.62 & 4391.14 & 5704.81 & 4060.48 & 6068.61\\
+Sep 1993 & 5155.40 & 4452.82 & 5886.74 & 4093.16 & 6284.98\\
+Oct 1993 & 5372.07 & 4624.76 & 6150.63 & 4242.50 & 6574.82\\
+Nov 1993 & 4923.69 & 4159.71 & 5723.50 & 3770.67 & 6160.63\\
+Dec 1993 & 4797.72 & 3998.70 & 5637.11 & 3593.16 & 6096.87\\
+Jan 1994 & 5246.60 & 4386.32 & 6149.64 & 3949.35 & 6644.03\\
+Feb 1994 & 5302.61 & 4406.47 & 6244.74 & 3951.96 & 6761.01\\
+\bottomrule
+\end{longtable*}
+
+\newpage{}
+
+\hypertarget{ets}{%
+\subsection{ETS}\label{ets}}
+
+\begin{figure}
+
+{\centering \includegraphics{T2_grupo5_files/figure-pdf/previsao-pontual-ets-1.pdf}
+
+}
+
+\end{figure}
+
+\begin{longtable*}{cccccc}
+\toprule
+\multicolumn{2}{c}{ } & \multicolumn{2}{c}{IC para 80\%} & \multicolumn{2}{c}{IC para 95\%} \\
+\cmidrule(l{3pt}r{3pt}){3-4} \cmidrule(l{3pt}r{3pt}){5-6}
+Período (mês/ano) & Prev. Pontual & LI & LS & LI & LS\\
+\midrule
+Sep 1992 & 4613.02 & 4391.65 & 4834.40 & 4274.46 & 4951.59\\
+Oct 1992 & 4808.08 & 4557.39 & 5058.77 & 4424.68 & 5191.48\\
+Nov 1992 & 4437.83 & 4153.58 & 4722.07 & 4003.11 & 4872.54\\
+Dec 1992 & 4337.83 & 4016.80 & 4658.86 & 3846.85 & 4828.80\\
+Jan 1993 & 4746.47 & 4386.22 & 5106.72 & 4195.51 & 5297.43\\
+Feb 1993 & 4771.43 & 4370.15 & 5172.71 & 4157.73 & 5385.14\\
+Mar 1993 & 5198.16 & 4754.52 & 5641.80 & 4519.66 & 5876.65\\
+Apr 1993 & 5139.63 & 4652.66 & 5626.60 & 4394.88 & 5884.39\\
+May 1993 & 4950.91 & 4419.94 & 5481.88 & 4138.87 & 5762.96\\
+Jun 1993 & 5019.38 & 4443.96 & 5594.80 & 4139.35 & 5899.41\\
+Jul 1993 & 4587.10 & 3966.96 & 5207.23 & 3638.68 & 5535.51\\
+Aug 1993 & 4840.20 & 4175.23 & 5505.18 & 3823.21 & 5857.20\\
+Sep 1993 & 4844.61 & 4134.77 & 5554.46 & 3759.00 & 5930.23\\
+Oct 1993 & 5024.39 & 4269.79 & 5778.99 & 3870.32 & 6178.45\\
+Nov 1993 & 4639.86 & 3840.68 & 5439.05 & 3417.61 & 5862.11\\
+Dec 1993 & 4526.53 & 3682.99 & 5370.07 & 3236.45 & 5816.61\\
+Jan 1994 & 4922.72 & 4035.12 & 5810.33 & 3565.25 & 6280.20\\
+Feb 1994 & 4936.06 & 4004.71 & 5867.40 & 3511.69 & 6360.43\\
+\bottomrule
+\end{longtable*}
+
+\newpage{}
+
+\hypertarget{ets-com-transformauxe7uxe3o}{%
+\subsection{ETS com transformação}\label{ets-com-transformauxe7uxe3o}}
+
+\begin{figure}
+
+{\centering \includegraphics{T2_grupo5_files/figure-pdf/previsao-pontual-ets-transf-1.pdf}
+
+}
+
+\end{figure}
+
+\begin{longtable*}{cccccc}
+\toprule
+\multicolumn{2}{c}{ } & \multicolumn{2}{c}{IC para 80\%} & \multicolumn{2}{c}{IC para 95\%} \\
+\cmidrule(l{3pt}r{3pt}){3-4} \cmidrule(l{3pt}r{3pt}){5-6}
+Período (mês/ano) & Prev. Pontual & LI & LS & LI & LS\\
+\midrule
+Sep 1992 & 4631.45 & 4406.50 & 4859.59 & 4288.73 & 4981.63\\
+Oct 1992 & 4819.80 & 4560.49 & 5083.19 & 4424.91 & 5224.24\\
+Nov 1992 & 4426.13 & 4138.59 & 4719.16 & 3988.65 & 4876.45\\
+Dec 1992 & 4311.70 & 3989.21 & 4641.30 & 3821.45 & 4818.58\\
+Jan 1993 & 4732.40 & 4360.53 & 5112.88 & 4167.27 & 5317.69\\
+Feb 1993 & 4780.20 & 4365.14 & 5205.91 & 4149.88 & 5435.45\\
+Mar 1993 & 5219.17 & 4748.72 & 5702.17 & 4504.93 & 5962.77\\
+Apr 1993 & 5164.25 & 4650.16 & 5693.52 & 4384.40 & 5979.64\\
+May 1993 & 4949.95 & 4397.25 & 5521.04 & 4112.43 & 5830.51\\
+Jun 1993 & 5035.98 & 4434.72 & 5658.67 & 4125.51 & 5996.63\\
+Jul 1993 & 4584.53 & 3955.55 & 5239.45 & 3633.64 & 5596.14\\
+Aug 1993 & 4839.70 & 4154.97 & 5553.57 & 3804.96 & 5942.70\\
+Sep 1993 & 4868.35 & 4137.02 & 5632.83 & 3764.09 & 6050.25\\
+Oct 1993 & 5044.94 & 4259.92 & 5866.89 & 3860.23 & 6316.15\\
+Nov 1993 & 4632.66 & 3823.65 & 5484.66 & 3414.00 & 5952.05\\
+Dec 1993 & 4504.35 & 3658.79 & 5398.42 & 3232.32 & 5890.09\\
+Jan 1994 & 4918.29 & 4005.02 & 5883.36 & 3544.10 & 6413.88\\
+Feb 1994 & 4955.39 & 3995.84 & 5971.87 & 3512.73 & 6531.48\\
+\bottomrule
+\end{longtable*}
+
+\newpage{}
 
 \hypertarget{resultados}{%
 \section{Resultados}\label{resultados}}
