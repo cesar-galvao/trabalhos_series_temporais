@@ -177,7 +177,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[sharp corners, interior hidden, borderline west={3pt}{0pt}{shadecolor}, frame hidden, enhanced, boxrule=0pt, breakable]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[borderline west={3pt}{0pt}{shadecolor}, frame hidden, interior hidden, boxrule=0pt, sharp corners, enhanced, breakable]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -264,9 +264,11 @@ aplicadas) ao nível de 5\% de significância.
 
 Prosseguimos com a seleção do melhor modelo ARIMA avaliando os gráficos
 de ACF e PACF. O primeiro parece apresentar quebra no primeiro lag
-sazonal, enquanto o segundo tem quebra no segundo lag simples.
-Entretanto, como não fica nítido um comportamento de queda amortizada,
-preferiu-se utilizar outro critério para a seleção do modelo.
+sazonal, enquanto o segundo tem quebra no segundo lag simples,
+configurando um \(\text{ARIMA}(2,1,0)\times(0,1,1)_{12}\) (porém os
+resíduos para este modelo não ficam muito bons). Entretanto, como não
+fica nítido um comportamento de queda amortizada, preferiu-se utilizar
+outro critério para a seleção do modelo.
 
 \includegraphics{T2_grupo5_files/figure-pdf/acf-pacf-sem-transformacao-1.pdf}
 
@@ -364,9 +366,11 @@ do teste KPSS nos resíduos da série com as diferenças já aplicadas.
 \end{longtable*}
 
 O gráfico da ACF parece apresentar quebra no primeiro lag sazonal,
-enquanto o PACF tem quebra no segundo lag simples. Entretanto, os
-gráficos não evidenciam comportamentos claros para a série. Novamente,
-os resíduos parecem ter média igual a zero.
+enquanto o PACF tem quebra no segundo lag simples, o que configura um
+\(\text{ARIMA}(2,1,0)\times(0,1,1)_{12}\) (porém, mais uma vez, os
+resíduos para este modelo não ficam muito bons). Entretanto, os gráficos
+não evidenciam comportamentos claros para a série. Novamente, os
+resíduos parecem ter média igual a zero.
 
 \includegraphics{T2_grupo5_files/figure-pdf/acf-pacf-arima-boxcox-1.pdf}
 
@@ -419,8 +423,6 @@ Shapiro-Wilk normality test & 0.98 & 0.23 & \\*
 \section{Modelos ETS: seleção, transformações e
 resíduos}\label{modelos-ets-seleuxe7uxe3o-transformauxe7uxf5es-e-resuxedduos}}
 
-JUSTIFICAR USO DO AAA EM VEZ DO TOP AICC
-
 \hypertarget{modelo-sem-transformauxe7uxe3o-1}{%
 \subsection{Modelo sem
 transformação}\label{modelo-sem-transformauxe7uxe3o-1}}
@@ -428,7 +430,10 @@ transformação}\label{modelo-sem-transformauxe7uxe3o-1}}
 \hypertarget{seleuxe7uxe3o-2}{%
 \subsubsection{Seleção}\label{seleuxe7uxe3o-2}}
 
-Iniciamos a exploração do modelo
+Para a seleção do modelo ETS, foi realizada uma varredura com todas as
+combinações possíveis de erro, tendência e sazonalidade, assim como a
+aplicação ou não de \emph{damp} na tendência. Os seis modelos com
+melhores indicadores são exibidos na tabela a seguir para comparação.
 
 \begin{longtable*}{lccc}
 \toprule
@@ -452,10 +457,52 @@ ETS(M,Ad,A) & 1767.73 & 1774.78 & 1817.29\\
 ETS(A,A,A) & 1771.20 & 1777.44 & 1818.01\\*
 \end{longtable*}
 
+De fato, modelos que misturam termos aditivos e multiplicativos
+apresentam os melhores indicadores AICc, mas o desempenho da função
+\texttt{ets()} é instável nessas condições. Por isso, opta-se pelo uso
+do terceiro melhor modelo, \(ETS(A, Ad, A)\). A decomposição da série
+temporal analisada utilizando este modelo é exposta no gráfico a seguir.
+
 \includegraphics{T2_grupo5_files/figure-pdf/melhor-fit-ETL-sem-transf-1.pdf}
 
 \hypertarget{resuxedduos-2}{%
 \subsubsection{Resíduos}\label{resuxedduos-2}}
+
+Uma análise visual dos resíduos indica comportamento aleatório em torno
+de zero e autocorrelações próximas a zero. Quanto à distribuição, a
+amostra parece ter uma distribuição próxima à normal, mas com caudas
+mais pesadas.
+
+\begin{figure}
+
+{\centering \includegraphics{T2_grupo5_files/figure-pdf/residuos-ets-sem-transform-1.pdf}
+
+}
+
+\end{figure}
+
+Observa-se ainda pelo resultado dos testes de hipótese a seguir temos
+uma série estacionária, com resíduos normalmente distribuídos e
+mutuamente independentes.
+
+\begin{longtable*}{lccc}
+\toprule
+ & Estatística & p-valor & Lag\\
+\midrule
+\endfirsthead
+\multicolumn{4}{@{}l}{\textit{(continued)}}\\
+\toprule
+ & Estatística & p-valor & Lag\\
+\midrule
+\endhead
+
+\endfoot
+\bottomrule
+\endlastfoot
+\cellcolor{gray!15}{KPSS Test for Level Stationarity} & \cellcolor{gray!15}{0.07} & \cellcolor{gray!15}{0.10} & \cellcolor{gray!15}{4}\\
+Box-Ljung test & 21.35 & 0.13 & 15\\
+\cellcolor{gray!15}{Shapiro-Wilk normality test} & \cellcolor{gray!15}{0.99} & \cellcolor{gray!15}{0.38} & \cellcolor{gray!15}{}\\*
+\end{longtable*}
 
 \hypertarget{modelo-com-transformauxe7uxe3o-1}{%
 \subsection{Modelo com
@@ -464,15 +511,15 @@ transformação}\label{modelo-com-transformauxe7uxe3o-1}}
 \hypertarget{seleuxe7uxe3o-3}{%
 \subsubsection{Seleção}\label{seleuxe7uxe3o-3}}
 
-a série com transformacao
+Utilizando a função \texttt{BoxCox.lambda()} obtém-se uma sugestão de
+transformação com \(\lambda =\) 0.712. A série transformada é exibida no
+gráfico a seguir.
 
 \includegraphics{T2_grupo5_files/figure-pdf/ETS-com-transf-1.pdf}
 
-decomposicao
-
-\includegraphics{T2_grupo5_files/figure-pdf/decomposicao-ets-com-transformacao-1.pdf}
-
-selecao do modelo com transformação
+No caso do modelo com transformação BoxCox a recomendação de modelo,
+obtida pelo mesmo método de varredura, é primariamente a seleção já
+feita para o modelo sem transformação, que é o \(ETS(A, Ad, A)\).
 
 \begin{longtable*}{lccc}
 \toprule
@@ -488,18 +535,58 @@ Modelo transformado & AIC & AICc & BIC\\
 \endfoot
 \bottomrule
 \endlastfoot
-\cellcolor{gray!15}{ETS(M,Ad,M)} & \cellcolor{gray!15}{1761.30} & \cellcolor{gray!15}{1768.36} & \cellcolor{gray!15}{1810.87}\\
-ETS(M,M,M) & 1761.94 & 1769.00 & 1811.51\\
-\cellcolor{gray!15}{ETS(Ad,A,A)} & \cellcolor{gray!15}{1764.25} & \cellcolor{gray!15}{1771.30} & \cellcolor{gray!15}{1813.81}\\
-ETS(M,Ad,A) & 1767.73 & 1774.78 & 1817.29\\
-\cellcolor{gray!15}{ETS(M,A,M)} & \cellcolor{gray!15}{1769.04} & \cellcolor{gray!15}{1775.29} & \cellcolor{gray!15}{1815.86}\\
-ETS(A,A,A) & 1771.20 & 1777.44 & 1818.01\\*
+\cellcolor{gray!15}{ETS(A,Ad,A)} & \cellcolor{gray!15}{1205.77} & \cellcolor{gray!15}{1212.82} & \cellcolor{gray!15}{1255.33}\\
+ETS(M,M,M) & 1207.69 & 1214.75 & 1257.26\\
+\cellcolor{gray!15}{ETS(M,Ad,M)} & \cellcolor{gray!15}{1207.92} & \cellcolor{gray!15}{1214.98} & \cellcolor{gray!15}{1257.49}\\
+ETS(M,Ad,A) & 1208.24 & 1215.29 & 1257.81\\
+\cellcolor{gray!15}{ETS(A,A,A)} & \cellcolor{gray!15}{1218.37} & \cellcolor{gray!15}{1224.62} & \cellcolor{gray!15}{1265.18}\\
+ETS(M,A,A) & 1221.45 & 1227.69 & 1268.26\\*
 \end{longtable*}
 
-MESMO MODELO, MAS COM TRANSFORMAÇÃO
+Os componentes do ajuste do modelo \(ETS(A, Ad, A)\) são expostas a
+seguir e, como no caso anterior, a transformação não apresenta nenhuma
+mudança aparente no comportamento da série.
+
+\includegraphics{T2_grupo5_files/figure-pdf/decomposicao-ets-com-transformacao-1.pdf}
 
 \hypertarget{resuxedduos-3}{%
 \subsubsection{Resíduos}\label{resuxedduos-3}}
+
+Assim como ocorre para a série não transformada, os resíduos parecem
+exibir comportamento aleatório em torno de zero, autocorrelações
+próximas a zero e distribuição próxima à normal, mas com caudas mais
+pesadas.
+
+\begin{figure}
+
+{\centering \includegraphics{T2_grupo5_files/figure-pdf/resíduos-modelo-transformado-1.pdf}
+
+}
+
+\end{figure}
+
+Novamente, os testes de hipótese expostos na tabela a seguir corroboram
+a hipótese de se tratar de uma série estacionária, com resíduos
+normalmente distribuídos e mutuamente independentes.
+
+\begin{longtable*}{lccc}
+\toprule
+ & Estatística & p-valor & Lag\\
+\midrule
+\endfirsthead
+\multicolumn{4}{@{}l}{\textit{(continued)}}\\
+\toprule
+ & Estatística & p-valor & Lag\\
+\midrule
+\endhead
+
+\endfoot
+\bottomrule
+\endlastfoot
+\cellcolor{gray!15}{KPSS Test for Level Stationarity} & \cellcolor{gray!15}{0.07} & \cellcolor{gray!15}{0.10} & \cellcolor{gray!15}{4}\\
+Box-Ljung test & 20.48 & 0.15 & 15\\
+\cellcolor{gray!15}{Shapiro-Wilk normality test} & \cellcolor{gray!15}{0.98} & \cellcolor{gray!15}{0.16} & \cellcolor{gray!15}{}\\*
+\end{longtable*}
 
 \hypertarget{estudo-de-desempenho-preditivo}{%
 \section{Estudo de desempenho
@@ -543,7 +630,13 @@ VER PQ A ETS\_TRANSF ESTÁ DANDO TUDO NA
 \subsection{Performance em relação aos horizontes de
 previsão}\label{performance-em-relauxe7uxe3o-aos-horizontes-de-previsuxe3o}}
 
-\includegraphics{T2_grupo5_files/figure-pdf/unnamed-chunk-1-1.pdf}
+\begin{figure}
+
+{\centering \includegraphics{T2_grupo5_files/figure-pdf/performance-1.pdf}
+
+}
+
+\end{figure}
 
 ARRUMAR A LEGENDA E OS VALORES E DEPOIS FAZER A ANÁLISE
 

@@ -125,7 +125,7 @@ kpss.test(E) %>%
       stripe_color = "gray!15")
 ```
 
-Prosseguimos com a seleção do melhor modelo ARIMA avaliando os gráficos de ACF e PACF. O primeiro parece apresentar quebra no primeiro lag sazonal, enquanto o segundo tem quebra no segundo lag simples. Entretanto, como não fica nítido um comportamento de queda amortizada, preferiu-se utilizar outro critério para a seleção do modelo.
+Prosseguimos com a seleção do melhor modelo ARIMA avaliando os gráficos de ACF e PACF. O primeiro parece apresentar quebra no primeiro lag sazonal, enquanto o segundo tem quebra no segundo lag simples, configurando um $\text{ARIMA}(2,1,0)\times(0,1,1)_{12}$ (porém os resíduos para este modelo não ficam muito bons). Entretanto, como não fica nítido um comportamento de queda amortizada, preferiu-se utilizar outro critério para a seleção do modelo.
 
 ```{r acf-pacf-sem-transformacao, fig.height=3, fig.width = 8}
 # Graficos de Autocorrelacao
@@ -264,14 +264,14 @@ kpss.test(E2) %>%
       stripe_color = "gray!15")
 ```
 
-O gráfico da ACF parece apresentar quebra no primeiro lag sazonal, enquanto o PACF tem quebra no segundo lag simples. Entretanto, os gráficos não evidenciam comportamentos claros para a série. Novamente, os resíduos parecem ter média igual a zero.
+O gráfico da ACF parece apresentar quebra no primeiro lag sazonal, enquanto o PACF tem quebra no segundo lag simples, o que configura um $\text{ARIMA}(2,1,0)\times(0,1,1)_{12}$ (porém, mais uma vez, os resíduos para este modelo não ficam muito bons). Entretanto, os gráficos não evidenciam comportamentos claros para a série. Novamente, os resíduos parecem ter média igual a zero.
 
 ```{r acf-pacf-arima-boxcox, fig.height=3, fig.width = 8}
 # Graficos de Autocorrelacao (BC)
 par(mfrow=c(1,3))
 plot(dadosbcdiff, main="Série (boxcox) com dif.",ylab="")
-acf(E2, lag=12*6, main="ACF")
-pacf(E2, lag=12*6, main="PACF")
+acf(dadosbcdiff, lag=12*6, main="ACF")
+pacf(dadosbcdiff, lag=12*6, main="PACF")
 ```
 
 Foram testadas combinações de $p$, $q$, $P$ e $Q$, com $d$ e $D$ fixados em 1 e, em seguida, selecionou-se o modelo ARIMA que apresentava menor valor do AICc. Temos, então, que o modelo escolhido para a série transformada é um $\text{ARIMA}(2,1,2)\times(0,1,2)_{12}$, assim como no caso da série sem transformação. Utilizando-se a função `auto.arima()` recebe-se uma sugestão de um modelo $ARIMA(3,1,1)\times(2,1,0)_{12}$ mas, assim como ocorre no modelo sem transformação, opta-se pelo modelo selecionado manualmente por apresentar um AICc menor.
@@ -344,14 +344,11 @@ rm(box, shap)
 # Modelos ETS: seleção, transformações e resíduos
 
 
-JUSTIFICAR USO DO AAA EM VEZ DO TOP AICC
-
-
 ## Modelo sem transformação
 
 ### Seleção
 
-Iniciamos a exploração do modelo 
+Para a seleção do modelo ETS, foi realizada uma varredura com todas as combinações possíveis de erro, tendência e sazonalidade, assim como a aplicação ou não de *damp* na tendência. Os seis modelos com melhores indicadores são exibidos na tabela a seguir para comparação.
 
 ```{r selecao-ETS-sem-transf}
 # monta as combinações possíveis de modelo ets
@@ -364,7 +361,7 @@ model <- expand_grid(v1 = c("A", "M", "N"), v2 = c("A", "M", "N"), v3 = c("A", "
 
 
 #funcao pra montar indicadores do modelo
-criterios <- function(modelo, damp) { 
+criterios <- function(modelo, damp, dados) { 
   ETS <- ets(dados, model = modelo, damped = damp)
   #usamos o objeto dados como um padrao
   
@@ -390,7 +387,7 @@ selecionados <- c(1, 2, 5, 6, 14, 18:24, 27:30, 32, 34, 36)
 
 model_select <- model[selecionados,]
 
-tabela_modelos_ETS <- map2_df(model_select$modelo, model_select$damp, criterios) %>%
+tabela_modelos_ETS <- map2_df(model_select$modelo, model_select$damp, criterios, dados) %>%
   arrange(AIC) %>%
   mutate(modelo = case_when(
     damped == TRUE ~ str_replace(sigla, ",A", ",Ad"),
@@ -416,12 +413,12 @@ tabela_modelos_ETS %>%
 
 ```
 
-
+De fato, modelos que misturam termos aditivos e multiplicativos apresentam os melhores indicadores AICc, mas o desempenho da função `ets()` é instável nessas condições. Por isso, opta-se pelo uso do terceiro melhor modelo, $ETS(A, Ad, A)$. A decomposição da série temporal analisada utilizando este modelo é exposta no gráfico a seguir.  
 
 ```{r melhor-fit-ETL-sem-transf}
 
 # decomposicao ETS sem transformacao ----
-fit_ets <- ets(dados, model = "MAM", damped = TRUE)
+fit_ets <- ets(dados, model = "AAA", damped = TRUE)
 
 plot(fit_ets)
 
@@ -430,53 +427,77 @@ plot(fit_ets)
 
 ### Resíduos
 
-```{r residuos-ets-sem-transform}
+Uma análise visual dos resíduos indica comportamento aleatório em torno de zero e autocorrelações próximas a zero. Quanto à distribuição, a amostra parece ter uma distribuição próxima à normal, mas com caudas mais pesadas.
+
+```{r residuos-ets-sem-transform, fig.height=5, fig.width = 7, fig.align='center'}
 
 #ESSE É O CODIGO DO TRABALHO QUE CONSEGUIMOS, TEM QUE TROCAR OS OBJETOS
 
 # Análise de resíduos ETS sem transformação
-# E <- fit1$residuals
-# par(mfrow=c(2,2))
-# plot(E)
-# acf(E)
-# pacf(E)
-# qqnorm(E)
-# qqline(E)
-# # Testes para ETS sem transformação
-# p_valor <- c(shapiro.test(E)$p.value,kpss.test(E)$p.value,
-# Box.test(E,lag=15,type="Ljung-Box",fitdf=3)$p.value)
-# Estatistica <- c(shapiro.test(E)$statistic,kpss.test(E)$statistic,
-# Box.test(E,lag=15,type="Ljung-Box",fitdf=3)$statistic)
-# Teste <- c("Normalidade","Estacionariedade","Independencia")
-# d <- data.frame(Estatistica,p_valor)
-# knitr::kable(d)
+E3 <- fit_ets$residuals
+par(mfrow=c(2,2))
+plot(E3, main = "Resíduos")
+acf(E3)
+pacf(E3)
+qqnorm(E3)
+qqline(E3)
+
 ```
 
+Observa-se ainda pelo resultado dos testes de hipótese a seguir temos uma série estacionária, com resíduos normalmente distribuídos e mutuamente independentes.
+
+```{r residuos-ets-sem-transformacao}
+# # Testes para ETS sem transformação
+box <- Box.test(E3,lag=15,type="Ljung-Box") %>% tidy() %>% select(method, everything()) %>% mutate(parameter = as.character(parameter)) #independencia
+shap <- shapiro.test(E3) %>% tidy() %>% mutate(parameter = "") %>% select(method, everything())  #normalidade
+kpss <- kpss.test(E3) %>% tidy() %>% select(method, everything()) %>% mutate(parameter = as.character(parameter))
+
+bind_rows(kpss,box, shap) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2,
+    col.names = c("", "Estatística", "p-valor", "Lag")
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+
+rm(box, shap, kpss)
+
+
+```
 
 
 ## Modelo com transformação
 
 ### Seleção
 
-a série com transformacao
-
-```{r ETS-com-transf}
+```{r ets-lambda}
 # avalia valor de lambda da transformacao boxcox
 lambda <- dados %>% BoxCox.lambda()
 
 dados_box <- dados %>% BoxCox(lambda)
+
+```
+
+
+Utilizando a função `BoxCox.lambda()` obtém-se uma sugestão de transformação com $\lambda =$ `r round(lambda,3)`. A série transformada é exibida no gráfico a seguir.
+
+```{r ETS-com-transf}
 
 # visualização e decomp da ETS com transformação
 plot(dados_box,main= parse(text = paste0('"Série com transformação Box-Cox  "', '~ lambda == ', round(lambda, 3))))
 
 ```
 
-decomposicao
 
-```{r decomposicao-ets-com-transformacao}
-mstl(dados_box)%>%plot(main = "Decomposição da série com transformação Box-Cox")
-```
-selecao do modelo com transformação
+No caso do modelo com transformação BoxCox a recomendação de modelo, obtida pelo mesmo método de varredura, é primariamente a seleção já feita para o modelo sem transformação, que é o $ETS(A, Ad, A)$.
 
 ```{r selecao-ETS-com-transformacao}
 # for(i in 1:length(model$modelo)){
@@ -488,10 +509,10 @@ selecao do modelo com transformação
 
 model_select_transf <- model[selecionados,]
 
-tabela_modelos_ETS_transf <- map2_df(model_select_transf$modelo, model_select_transf$damp, criterios) %>%
+tabela_modelos_ETS_transf <- map2_df(model_select_transf$modelo, model_select_transf$damp, criterios, dados_box) %>%
   arrange(AIC) %>%
   mutate(modelo = case_when(
-    damped == TRUE ~ str_replace(sigla, "A", "Ad"),
+    damped == TRUE ~ str_replace(sigla, ",A", ",Ad"),
     .default = sigla
   ))
 
@@ -513,13 +534,58 @@ tabela_modelos_ETS_transf %>%
       stripe_color = "gray!15")
 ```
 
-MESMO MODELO, MAS COM TRANSFORMAÇÃO
+
+Os componentes do ajuste do modelo $ETS(A, Ad, A)$ são expostas a seguir e, como no caso anterior, a transformação não apresenta nenhuma mudança aparente no comportamento da série.
+
+```{r decomposicao-ets-com-transformacao}
+
+fit_ets_box <- ets(dados_box, model = "AAA", damped = TRUE)
+
+plot(fit_ets_box)
+```
 
 
 ### Resíduos
 
-```{r resíduos-modelo-transformado}
+Assim como ocorre para a série não transformada, os resíduos parecem exibir comportamento aleatório em torno de zero, autocorrelações próximas a zero e distribuição próxima à normal, mas com caudas mais pesadas.
 
+```{r resíduos-modelo-transformado, fig.height=5, fig.width = 7, fig.align='center'}
+
+E4 <- fit_ets_box$residuals
+par(mfrow=c(2,2))
+plot(E4, main = "Resíduos")
+acf(E4)
+pacf(E4)
+qqnorm(E4)
+qqline(E4)
+
+```
+
+Novamente, os testes de hipótese expostos na tabela a seguir corroboram a hipótese de se tratar de uma série estacionária, com resíduos normalmente distribuídos e mutuamente independentes.
+
+```{r residuos-ets-com-transformacao}
+# # Testes para ETS com transformação
+box <- Box.test(E4,lag=15,type="Ljung-Box") %>% tidy() %>% select(method, everything()) %>% mutate(parameter = as.character(parameter)) #independencia
+shap <- shapiro.test(E4) %>% tidy() %>% mutate(parameter = "") %>% select(method, everything())  #normalidade
+kpss <- kpss.test(E4) %>% tidy() %>% select(method, everything()) %>% mutate(parameter = as.character(parameter))
+
+bind_rows(kpss,box, shap) %>%
+  knitr::kable(
+    format = "latex",
+    align = c("lccc"),
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    escape = FALSE,
+    digits = 2,
+    col.names = c("", "Estatística", "p-valor", "Lag")
+    ) %>%
+  kableExtra::kable_styling(
+      position = "center",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15")
+
+rm(box, shap, kpss)
 
 
 ```
@@ -578,15 +644,15 @@ CV_ets_transf <- tsCV(y = dados, forecastfunction = f_ets_transf,
 # Cálculo do erro absoluto médio (MAE) para cada horizonte de previsão ----
 
 #-------------- otimizado abaixo -------------#
-MAE_arima <- CV_arima %>% abs() %>% colMeans(na.rm=T)
-MAE_arima_transf <-  CV_arima_transf %>% abs() %>% colMeans(na.rm=T)
-MAE_ets <-  CV_ets %>% abs() %>% colMeans(na.rm=T)
-MAE_ets_transf <-  CV_ets_transf %>% abs() %>% colMeans(na.rm=T)
-
-tab <- cbind(as.numeric(MAE_arima), as.numeric(MAE_ets))
-tab_transf <- cbind(MAE_arima_transf, MAE_ets_transf)
-
-tab_erros <-  tibble(MAE_arima, MAE_ets, MAE_arima_transf, MAE_ets_transf)
+# MAE_arima <- CV_arima %>% abs() %>% colMeans(na.rm=T)
+# MAE_arima_transf <-  CV_arima_transf %>% abs() %>% colMeans(na.rm=T)
+# MAE_ets <-  CV_ets %>% abs() %>% colMeans(na.rm=T)
+# MAE_ets_transf <-  CV_ets_transf %>% abs() %>% colMeans(na.rm=T)
+# 
+# tab <- cbind(as.numeric(MAE_arima), as.numeric(MAE_ets))
+# tab_transf <- cbind(MAE_arima_transf, MAE_ets_transf)
+# 
+# tab_erros <-  tibble(MAE_arima, MAE_ets, MAE_arima_transf, MAE_ets_transf)
 #-------------------------------------------#
 
 tab_erros <- tibble(
@@ -619,11 +685,22 @@ VER PQ A ETS_TRANSF ESTÁ DANDO TUDO NA
 
 ## Performance em relação aos horizontes de previsão
 
-```{r}
+```{r performance, fig.height=3, fig.width = 4.5, fig.align='center'}
 tab_erros %>%
-  select(-h) %>%
-  plot.ts(plot.type='s',col=1:4,lwd=2,xlab="h",ylab="MAE")
-legend(x=1,y=0.44, legend=c("ARIMA", "ETS", "ARIMA Transformada", "ETS Transformada"), col=1:4, lwd=2)
+  pivot_longer(cols = -h, names_to = "Modelo", values_to = "values")%>%
+  mutate(
+    Modelo = str_remove_all(Modelo, "MAE_"),
+    h = str_remove_all(h, "h="),
+    h = as.integer(h)) %>%
+  ggplot(aes(h, values, color = Modelo))+
+  geom_line()+
+  labs(y = "MAE")+
+  theme_bw()
+
+# tab_erros %>%
+#   select(-h) %>%
+#   plot.ts(plot.type='s',col=1:4,lwd=2,xlab="h",ylab="MAE")
+#   legend(x=1,y=0.44, legend=c("ARIMA", "ETS", "ARIMA Transformada", "ETS Transformada"), col=1:4, lwd=2)
 ```
 
 ARRUMAR A LEGENDA E OS VALORES E DEPOIS FAZER A ANÁLISE
