@@ -43,8 +43,7 @@ serie <- M3[[id]]
 dados <- serie$x
 ```
 
-
-A série temporal escolhida foi a de número *id* correspondente a `r id`. De acordo com a definição do próprio pacote, refere-se a *`r serie$description`*. Foram realizadas medidas mensais de 1983 a 1992 e o horizonte de previsão requerido é das 18 ocorrências seguintes.  
+A série temporal escolhida foi a de número *id* correspondente a `r id`. De acordo com a definição do próprio pacote, refere-se a *`r serie$description`*. Foram realizadas medidas mensais de 1983 a 1992 e o horizonte de previsão requerido é das 18 ocorrências seguintes.
 
 O gráfico da série, com *in* e *out-sample*, é exposto a seguir.
 
@@ -56,8 +55,8 @@ plot(serie, main = "Série Temporal M3-2183")
 
 A série aparenta ter dois períodos, pelo menos: um ciclo anual e outro que compreende um período maior. No entanto, ao se tentar decompor a série com múltiplas sazonalidades, obté-se o seguinte:
 
-* **Adicionando uma componente sazonal com ciclo menor que 1 ano** -- uma das componentes sazonais apresenta heteroscedasticidade;
-* **Adicionando uma componente sazonal com ciclo maior que 1 ano** -- resíduos apresentam periodicidade ou heteroscedasticidade.
+-   **Adicionando uma componente sazonal com ciclo menor que 1 ano** -- uma das componentes sazonais apresenta heteroscedasticidade;
+-   **Adicionando uma componente sazonal com ciclo maior que 1 ano** -- resíduos apresentam periodicidade ou heteroscedasticidade.
 
 ```{r decomposicao-mstl}
 serie_ms <- forecast::msts(dados, seasonal.periods = c(12))
@@ -72,9 +71,7 @@ decomp_mstl <- mstl(serie_ms, lambda = NULL, t.window = 9)
 
 ```
 
-
-Optou-se portanto pela decomposição STL (apesar de os dados terem inicialmente formado um objeto `msts`) apenas com a sazonalidade anual, mas fica evidente que esta decomposição não é adequada quando se avalia a componente de tendência, que aparenta ainda carregar algum componente periódico. Os resíduos aparentam um comportamento aleatório e têm média `r round(mean(decomp_mstl[,4]),3)`, o que é próximo de zero o suficiente considerando a magnitude dos dados da série. A decomposição é exposta a seguir.  
-
+Optou-se portanto pela decomposição STL (apesar de os dados terem inicialmente formado um objeto `msts`) apenas com a sazonalidade anual, mas fica evidente que esta decomposição não é adequada quando se avalia a componente de tendência, que aparenta ainda carregar algum componente periódico. Os resíduos aparentam um comportamento aleatório e têm média `r round(mean(decomp_mstl[,4]),3)`, o que é próximo de zero o suficiente considerando a magnitude dos dados da série. A decomposição é exposta a seguir.
 
 ```{r grafico-mstl}
 
@@ -82,16 +79,15 @@ decomp_mstl %>% autoplot(main = "Decomposição MSTL com período anual simples"
 
 ```
 
-
-
-
 # Modelos ARIMA: seleção, transformações e resíduos
 
 ## Modelo sem transformação
 
 ### Seleção
 
-Primeiramente, utilizou-se as funções *ndiffs()* e *nsdiffs()* do pacote *forecast* para identificar quantas diferenças simples e sazonais seriam necessárias para que a série se tornasse estacionária. Concluiu-se pelo resultado dessas funções que são necessárias uma diferenciação simples e uma sazonal. O teste KPSS confirma isso ao não rejeitar a hipótese nula de estacionariedade da série (com diferenças já aplicadas) ao nível de 5% de significância.
+Primeiramente, utilizou-se as funções *ndiffs()* e *nsdiffs()* do pacote *forecast* para identificar quantas diferenças simples e sazonais seriam necessárias para que a série se tornasse estacionária. Concluiu-se pelo resultado dessas funções que são necessárias uma diferenciação simples e uma sazonal. O teste KPSS confirma isso ao não rejeitar a hipótese nula de estacionariedade da série (com diferenças já aplicadas) ao nível de 5% de significância.[^1]
+
+[^1]: Para todos os demais testes de hipótese, toma-se como referência $\alpha = 0,05$ o nível de significância para regra de decisão.
 
 ```{r diff-arima}
 # diferenciacoes comuns
@@ -166,7 +162,6 @@ for(p in 0:2){
 #auto.arima(serie_ms)
 ```
 
-
 ### Resíduos
 
 Foram retirados os zeros da inicialização para possibilitar a análise dos resíduos. Observa-se pelo gráfico que os resíduos são aleatórios e aparentemente centrados em zero, com variação constante. Além disso, verifica-se uma distribuição aproximadamente normal, mas com caudas mais pesadas. Finalmente, o gráfico ACF apresenta que a autocorrelação dos resíduos está, em sua grande maioria, dentro da banda de confiança, com exceção de um ponto, que extrapola ligeiramente a margem.
@@ -182,7 +177,6 @@ acf(E,lag.max=12*6,main="ACF")
 ```
 
 Por fim, realiza-se testes de hipótese para independência e normalidade (o teste KPSS para estacionariedade já foi apresentado) e seus resultados são apresentados na tabela a seguir. De fato, o teste de Shapiro-Wilk não rejeita a normalidade da distribuição dos resíduos apesar de o gráfico QQ apresentar caudas pesadas. Além disso, o teste Ljung-Box com *lag* igual a 15 também não rejeita a independência entre os resíduos e, consequentemente, os dados da série.
-
 
 ```{r testes-arima}
 #Testes
@@ -212,7 +206,6 @@ rm(box, shap)
 
 ### Seleção
 
-
 ```{r transformacao-boxcox}
 # Transformacao de Box-Cox
 autolambda <- BoxCox.lambda(dados)
@@ -230,9 +223,7 @@ plot(dados, main='Série original',ylab='')
 plot(dadosbc, main='Série transformada',ylab='')
 ```
 
-
 Após aplicar a tranformação de Box-Cox na série, utilizou-se as funções *ndiffs()* e *nsdiffs()* para identificar quantas diferenciações simples e sazonais seriam necessárias para que a série se torne estacionária. Concluiu-se que são necessárias uma diferenciações simples e uma diferenciações sazonal, o que é confirmado pelo resultado do teste KPSS nos resíduos da série com as diferenças já aplicadas.
-
 
 ```{r diff-arima-boxcox}
 # Diferencas (BC)
@@ -340,9 +331,7 @@ bind_rows(box, shap) %>%
 rm(box, shap)
 ```
 
-
 # Modelos ETS: seleção, transformações e resíduos
-
 
 ## Modelo sem transformação
 
@@ -413,7 +402,7 @@ tabela_modelos_ETS %>%
 
 ```
 
-De fato, modelos que misturam termos aditivos e multiplicativos apresentam os melhores indicadores AICc, mas o desempenho da função `ets()` é instável nessas condições. Por isso, opta-se pelo uso do terceiro melhor modelo, $ETS(A, Ad, A)$. A decomposição da série temporal analisada utilizando este modelo é exposta no gráfico a seguir.  
+De fato, modelos que misturam termos aditivos e multiplicativos apresentam os melhores indicadores AICc, mas o desempenho da função `ets()` é instável nessas condições. Por isso, opta-se pelo uso do terceiro melhor modelo, $ETS(A, Ad, A)$. A decomposição da série temporal analisada utilizando este modelo é exposta no gráfico a seguir.
 
 ```{r melhor-fit-ETL-sem-transf}
 
@@ -423,7 +412,6 @@ fit_ets <- ets(dados, model = "AAA", damped = TRUE)
 plot(fit_ets)
 
 ```
-
 
 ### Resíduos
 
@@ -471,7 +459,6 @@ rm(box, shap, kpss)
 
 ```
 
-
 ## Modelo com transformação
 
 ### Seleção
@@ -484,7 +471,6 @@ dados_box <- dados %>% BoxCox(lambda)
 
 ```
 
-
 Utilizando a função `BoxCox.lambda()` obtém-se uma sugestão de transformação com $\lambda =$ `r round(lambda,3)`. A série transformada é exibida no gráfico a seguir.
 
 ```{r ETS-com-transf}
@@ -493,7 +479,6 @@ Utilizando a função `BoxCox.lambda()` obtém-se uma sugestão de transformaç�
 plot(dados_box,main= parse(text = paste0('"Série com transformação Box-Cox  "', '~ lambda == ', round(lambda, 3))))
 
 ```
-
 
 No caso do modelo com transformação BoxCox a recomendação de modelo, obtida pelo mesmo método de varredura, é primariamente a seleção já feita para o modelo sem transformação, que é o $ETS(A, Ad, A)$.
 
@@ -532,7 +517,6 @@ tabela_modelos_ETS_transf %>%
       stripe_color = "gray!15")
 ```
 
-
 Os componentes do ajuste do modelo $ETS(A, Ad, A)$ são expostas a seguir e, como no caso anterior, a transformação não apresenta nenhuma mudança aparente no comportamento da série.
 
 ```{r decomposicao-ets-com-transformacao}
@@ -541,7 +525,6 @@ fit_ets_box <- ets(dados_box, model = "AAA", damped = TRUE)
 
 plot(fit_ets_box)
 ```
-
 
 ### Resíduos
 
@@ -588,13 +571,12 @@ rm(box, shap, kpss)
 
 ```
 
-
-
 # Estudo de desempenho preditivo
 
 Para realizar a análise do desempenho preditivo usando uma abordagem de janela deslizante, o estudo considera uma janela de tamanho $n-14$ e calcula os erros de previsão para horizontes de até 5 períodos. Utilizando os modelos previamente mencionados para criar as funções de previsão, os resultados são apresentados em um gráfico e uma tabela, mostrando os erros absolutos para cada horizonte de previsão.
 
 ## Resultados da Janela Deslizante
+
 ```{r funcoes-previsao}
 # Definindo as funções de previsão
 
@@ -679,8 +661,6 @@ tab_erros %>%
       stripe_color = "gray!15")
 ```
 
-
-
 ## Performance em relação aos horizontes de previsão
 
 ```{r performance, fig.height=3, fig.width = 4.5, fig.align='center'}
@@ -701,12 +681,11 @@ tab_erros %>%
 #   legend(x=1,y=0.44, legend=c("ARIMA", "ETS", "ARIMA Transformada", "ETS Transformada"), col=1:4, lwd=2)
 ```
 
-Ao analisar o gráfico obtido, observa-se que o modelo ARIMA, tanto para a série original quanto para a série transformada, apresentou erros médios menores na maioria dos horizontes de previsão, com exceção do horizonte 1. Portanto, o modelo $\text{ARIMA}(2,1,2)\times(2,1,0)_{12}$ obteve melhor comportamento para o caso original e o caso transformado.
-
+Ao analisar o gráfico obtido, observa-se que o modelo ARIMA, tanto para a série original quanto para a série transformada, apresentou erros médios menores na maioria dos horizontes de previsão, com exceção do horizonte 1. Portanto, o modelo $\text{ARIMA}(2,1,2)\times(0,1,2)_{12}$ obteve melhor comportamento para o caso original e o caso transformado.
 
 # Gráficos da previsão pontual e da previsão intervalar dos 4 modelos selecionados
 
-Utilizou-se o modelo $\text{ARIMA}(2,1,2)\times(2,1,0)_{12}$ para realizar previsões pontuais e intervalares dos modelos selecionados. O horizonte de previsão fornecido pelo banco de dados foi de 18 pontos.
+Utilizou-se o modelo $\text{ARIMA}(2,1,2)\times(0,1,2)_{12}$ para realizar previsões pontuais e intervalares dos modelos selecionados. O horizonte de previsão fornecido pelo banco de dados foi de 18 pontos.
 
 Os gráficos fornecidos permitem visualizar as previsões pontuais e intervalares da série temporal da competição de previsão M3, com uma probabilidade de cobertura de 95%. Já as tabelas, apresentam as previsões para um horizonte de 18 pontos e fornecem os intervalos das probabilidades de cobertura 80% e 95%.
 
@@ -715,6 +694,7 @@ Ao analisar os gráficos e as tabelas nas seções a seguir, observa-se que em t
 {{< pagebreak >}}
 
 ## ARIMA
+
 ```{r previsao-pontual-arima, fig.align='center', fig.height=3}
 # Verificando o h
 h <- M3[[id]]$h
@@ -745,9 +725,11 @@ arima_prev95 %>%
     add_header_above(c(" " = 2, "IC para 80%" = 2, "IC para 95%" = 2))
 
 ```
+
 {{< pagebreak >}}
 
 ## ARIMA com transformação
+
 ```{r previsao-pontual-arima-transf, fig.align='center', fig.height=3}
 # ARIMA com transformação
 arima_transf_prev95 <- f_arima_transf(dados, h)
@@ -769,9 +751,11 @@ arima_transf_prev95 %>%
       col.names = c("Período (mês/ano)", "Prev. Pontual", "LI", "LS", "LI", "LS")) %>%
     add_header_above(c(" " = 2, "IC para 80%" = 2, "IC para 95%" = 2))
 ```
+
 {{< pagebreak >}}
 
 ## ETS
+
 ```{r previsao-pontual-ets, fig.align='center', fig.height=3}
 # ETS
 ets_prev95 <- f_ets(dados, h)
@@ -793,9 +777,11 @@ ets_prev95 %>%
       col.names = c("Período (mês/ano)", "Prev. Pontual", "LI", "LS", "LI", "LS")) %>%
     add_header_above(c(" " = 2, "IC para 80%" = 2, "IC para 95%" = 2))
 ```
+
 {{< pagebreak >}}
 
 ## ETS com transformação
+
 ```{r previsao-pontual-ets-transf, fig.align='center', fig.height=3}
 # ETS com transformação
 ets_transf_prev95 <- f_ets_transf(dados, h)
@@ -817,14 +803,12 @@ ets_transf_prev95 %>%
       col.names = c("Período (mês/ano)", "Prev. Pontual", "LI", "LS", "LI", "LS")) %>%
     add_header_above(c(" " = 2, "IC para 80%" = 2, "IC para 95%" = 2))
 ```
+
 {{< pagebreak >}}
 
 # Resultados
 
-Foi utilizada a métrica do erro absoluto médio (MAE) para comparar o desempenho preditivo dos modelos selecionados com alguns *benchmarks* da biblioteca *forecast*. Estes valores estão apresentados no gráfico abaixo e evidenciam uma melhor performance do modelo gerado pela função automática *auto.arima()*, seguido pelos modelos ARIMA selecionados manualmente.  
-
-  
-
+Foi utilizada a métrica do erro absoluto médio (MAE) para comparar o desempenho preditivo dos modelos selecionados com alguns *benchmarks* da biblioteca *forecast*. Estes valores estão apresentados no gráfico abaixo e evidenciam uma melhor performance do modelo gerado pela função automática *auto.arima()*, seguido pelos modelos ARIMA selecionados manualmente.
 
 ```{r mae-benchmarks}
 ## MAE (Benchmarks)
@@ -910,17 +894,13 @@ tabela %>%
   theme_bw()
 ```
 
-
 # Conclusão
 
 Neste estudo de caso, a performance dos modelos ARIMA é superior aos demais modelos selecionados manualmente em todos os horizontes de previsão. Ainda, como é possível observar no gráfico de comparação com os *benchmarks*, as funções do grupo arima parecem se comportar como um grupo separado com desempenho melhor que as demais, pelo menos até um horizonte de previsão $h=5$. Para esta série, portanto, indica-se um modelo ARIMA obtido pela função `auto.arima()`.
 
-
 # Apêndice
 
-Todo o projeto de composição deste documento pode ser encontrado aqui: [https://github.com/cesar-galvao/trabalhos_series_temporais](https://github.com/cesar-galvao/trabalhos_series_temporais)  
-
-
+Todo o projeto de composição deste documento pode ser encontrado aqui: <https://github.com/cesar-galvao/trabalhos_series_temporais>
 
 ```{r codigo, eval = FALSE, echo = TRUE}
 
@@ -1605,4 +1585,3 @@ rm(list = ls())
 gc()
 
 ```
-
